@@ -589,7 +589,7 @@
 
                 // Toggle this to false to disable the visible filename in the hero banner
                 // (you can also comment out the section between the START/END markers below)
-                const SHOW_HERO_CAPTION = true;
+                const SHOW_HERO_CAPTION = false;
 
             function niceCaption(filename) {
                 return filename.replace(/\.[^.]+$/, '')
@@ -666,7 +666,7 @@
                 let lastRun = Date.now();
 
                 // --- SLIDE DURATION START ---
-                const SLIDE_DURATION_MS = 6000;
+                const SLIDE_DURATION_MS = 7000;
                 // --- SLIDE DURATION END ---
 
                 function show(i) {
@@ -716,7 +716,7 @@
                     if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
                         start();
                     }
-                }, 6000);
+                }, 5000);
 
                 if (slides.length > 1) start();
             }

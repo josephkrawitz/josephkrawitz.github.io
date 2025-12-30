@@ -983,6 +983,9 @@
                                 let intervalId = null;
                                 let lastRun = Date.now();
 
+                                // Slide duration (milliseconds) — increased to 6000ms per request
+                                const SLIDE_DURATION_MS = 5500;
+
                                 function show(i) {
                                     if (!slides.length) return;
                                     slides.forEach((s, j) => s.classList.toggle('active', j === i));
@@ -996,8 +999,8 @@
 
                                 function start() {
                                         if (intervalId || slides.length <= 1) return;
-                                        intervalId = setInterval(next, 4000); // rotate every 4s now
-                                        if (Date.now() - lastRun > 6000) next();
+                                        intervalId = setInterval(next, SLIDE_DURATION_MS); // rotate every SLIDE_DURATION_MS
+                                        if (Date.now() - lastRun > SLIDE_DURATION_MS + 1000) next();
                                 }
 
                                 function stop() {
@@ -1022,7 +1025,7 @@
                                     if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
                                         start();
                                     }
-                                }, 6000);
+                                }, 5000);
 
                                 // start rotating
                                 if (slides.length > 1) start();
