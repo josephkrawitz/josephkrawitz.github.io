@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "🚞";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🏙️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "⛩️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🐗 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "👾 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+            <h2 id="day-5">Wednesday, April 9th: Hakone, Tokyo ⛩️</h2>
+
+        </header>
+
+        <img src="Japan Blog/Photos/Japan - 352 of 485.jpeg" alt="Hakone Day Header Pic" />
+
+        <div class="navigation-buttons">   
+            <a href="day-4.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-6.html"><button>Next Day</button></a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                
+                <li><a href="#Morning-1">Early Morning: Onsens & Gora Departure</a></li>
+                <li><a href="#Morning-2">Morning: Motohakone and Lake Ashi</a></li>
+                <li><a href="#Afternoon-1">Afternoon: Hakone-Yumoto and Enter: Tokyo</a></li>
+                <li><a href="#Evening-1">Late Afternoon: Asakusa (Senso-ji, Asakusa Shrine, Nakamise, Overlook, Asakusa Underground Street), Akihabara First Look</a></li>
+                <li><a href="#Evening-2">Evening: Akihabara (Ishibashi-inari Shrine, Shopping)</a></li>
+                <li><a href="#Night-1">Night: Dinner, Arcade</a></li>
+            </ul>
+        </div>
+
+        <h2 id="Morning=1">Early Morning: Onsens & Gora Departure</h2>
+
+        <p>
+            I set my alarm for 5am because 5:15 is when the onsen open. I have the private bath on our balcony, but of course, I am still curious about the 'real' ones. I'm in my samue and take my bath basket when I set out to explore the hotel in the soft light of dawn.
+        </p>
+
+        <p>
+            I thought I found them, but my first stop was actually the 3 private onsen which do not require reservations or an additional fee, and that I hadn't known existed in advance (or I wouldn't have cared so much about having our own in our room). But the lanterns outside each door were all on, so it seemed like they were already taken by the day's first occupants. Ah well. Moving on.
+        </p>
+
+        <p>
+            I continued and found the two communal baths. I was told before the trip that if there were any kanji worth learning, it was the ones for male and female. Good news, I remembered them! I went in the men's changing room, not interested in committing the most stereotypical snafu ever.
+        </p>
+
+        <p>
+            Yep, it's a locker room. There's a monitor playing an animation on loop with an English narrator explaining the onsen etiquette for tourists. Fortunately, I knew pretty much all of it. The video was kinda funny though. The guy was like "oh god, no don't do that, that's gross!" about things like washing yourself off standing instead of sitting on the stool. (You thoroughly wash your entire body in the shower part first, so that the water in the hot spring bath itself stays clean, both ritually and because it doesn't get drained and refilled nearly as often as you would want)
+        </p>
+
+        <p>
+            I kinda wanted to see the pretty pool of water and surrounding greenery, but I only made it down to my undies before changing my mind. I didn't expect to get the whole thing to myself, but there were enough old Japanese men who didn't seem in the mood to make friends with a foreigner first thing in the morning in the bathhouse. Nobody did anything to put me off, but I felt like I might be a cause of discomfort even though I was pretty confident I knew the proper etiquette. So I figured I'd let them have their thing and I'd go back to the private ones.
+        </p>
+
+        <p>
+            An older Japanese couple was just leaving as I was arriving. The lamp didn't immediately go out to show the door was unlocked, which is how it is meant to work, so it's good I saw them myself. Well, I went in, took a look, and decided against it again. It's a little pretty, but also tightly fenced in. Overall, not worth all the extra hassle compared to my private bath at my room. So I did that again instead. Jacob woke up a bit later, at around 6.
+        </p>
+
+            <img src = "Japan Blog/Photos/IMG_6028.jpeg" alt="Outside of our Ryokan in the Morning" />
+
+        <p>
+            Fast forward a bit and Jacob and I are both awake, we are packed, and we are heading out. It would've been cool to spend more time taking advantage of this nice relaxing space, but it just didn't make sense to return here before the designated checkout time. We headed out to Gora Station and it was… <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 325 of 485.jpeg">shockingly empty</span>. It's not like it's 5am anymore, it's 7:30. Apparently, the ropeway isn't open that early, so there's nobody coming in or out. We figured out the correct platform to stand at for our train and practically had it to ourselves.
+        </p>
+
+        <h2 id="Morning-2">Morning: Motohakone and Lake Ashi</h2>
+
+        <p>
+            The train to <b>Kowakudani</b> was very brief, then we had a short walk to a stop where we would get on a bus that would take us the rest of the way to <b>Motohakone</b>, the port at <b>Lake Ashi</b>. We weren't going to complete the full loop, but we were going to get to the most important part that we had missed out on yesterday. The iconic <b>Hakone Shrine's torii gate of peace</b>, which stands on the water and probably boasts millions of Instagram pictures every week. And we would get there before 9am. I hadn't forgotten all those tour buses on the mountain yesterday. I could not underestimate them.
+        </p>
+
+        <img src = "Japan Blog/Photos/IMG_6049.jpeg" alt="Motohakone at the edge of Lake Ashi" /><p></p>
+        <div class="note"><strong>Editor's note:</strong> There were clues along the way that we were heading in the right 
+            direction. <img src = "Japan Blog/Photos/Japan - 326 of 485.jpeg" alt="Torii Gate en route" /></div><p></p>
+
+        <p>
+            We got off the bus and started the walk around the side of the lake. Originally, we thought we would find a coin locker for our carry-on luggage, but we ended up just taking them along with us. It's a gorgeous town over there. Well, eventually we found the shrine, then crossed the road and went down the stairs to the torii gate. Or at least, to join the queue. The sign requests parties keep to 3 minutes each for their picture-taking. There are other people there, but not nearly as many as there would be in the near future. And everyone was friendly enough and reasonable with time taken. Since it was basically a game of asking the people in line after you to take your picture, there was no guarantee it would be incredible. Especially because the lighting was proving to be a challenge, which I observed as we were nearing the front of the line. That's ok, I'm still happy with the experience of walking out there. it was nice.
+        </p>
+
+        <img src = "Japan Blog/Photos/20250409_084858.jpeg" alt="Hakone Shrine Torii Gate on Lake Ashi" /><p></p>
+
+        <p>
+            That was fun, but we aren't done yet! We went back up to the <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_090553.jpg">main shrine</span>, which would open in less than 10 minutes (at 9 o'clock). We got our <span class="modal-trigger" data-image="Japan Blog/Photos/hakone peace.jpeg">goshuin</span>, and were about to explore the rest of the shrine beyond the entrance area… when we saw how many stairs were required. No thanks, I've had about enough stairs. My feet are still hurting this morning and we basically know what this shrine is going to look like. Run away!!
+        </p>
+
+            <div class="note"><strong>Editor's note: </strong>I quickly mentioned above that we went down the stairs to get to the line 
+            to take a photo at the gate. <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3233.jpeg">Here is a picture</span> of those steps. Another reminder, we had all of our luggage on us. #EnoughStairs</div>
+
+        <p>
+            It's a really nice walk back to the lake. We stop and take some pictures of the torii gate across the water, the birds, the kayaks… everything is serene this morning, before the big boats are out.
+        </p>
+
+            <img src = "Japan Blog/Photos/IMG_6100.jpeg" alt="Lake Ashi" /><p></p>
+
+        <p>
+            We continue our perimeter and finally, reach the view I was looking for.
+        </p>
+
+        <img src = "Japan Blog/Photos/Japan - 350 of 485.jpeg" alt="Torii Gate and Mt Fuji from Lake Ashi" /><p></p>
+
+        <p>
+            We hang out for a little while. I've already decided that I don't want to spend the time this morning actually getting on the pirate ship boat. But… the first departure from the port we just passed is pretty soon. We can hang out and enjoy the view for a few more minutes.
+        </p>
+
+        <img src = "Japan Blog/Photos/Japan - 353 of 485.jpeg" alt="Torii Gate and Mt Fuji AND a pirate ship! from Lake Ashi" /><p></p>
+
+        <p>
+            Alright, Hakone was definitely a destination full of high highs and low lows. Now, it's time for us to start our departure. After refilling Jacob's IC card at the 7/11. And taking 3 tries to find the right bus stop. <em>And</em> also taking a couple tries to get on the right bus. Hakone, you are beautiful but did me so dirty.
+        </p>
+
+        <h2 id="Afternoon-1">Afternoon: Hakone-Yumoto and Enter: Tokyo</h2>
+
+        <p>
+            We boarded the bus and made our final big decision for the Fuji-Hakone region: the bus <em>will</em> go the entire way to the Shinkansen station. However, it will <em>also</em> stop at the Hakone-Yumoto Station on the way. This was a necessary transfer on our way up to Gora yesterday, and the train between there and the Shinkansen station is included in the Hakone Freepass that we paid for. So, you know what? Yeah, let's get off the bus here. We can have lunch, have a last look for a souvenir shop in the station, and get a little more time in Hakone (and a little more use out of the Freepass, since we missed out on so many of its potential benefits yesterday).
+        </p>
+
+        <p>
+            The bus let us out at street level, just in front of the station and below its main platform. Unexpectedly, right there by the base of the stairs to go up into the station, is a theme shop for one of the few anime that I actually have an interest in: <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_112840.jpeg">Neon Genesis Evangelion</span>. It's a weird psychological sci-fi from the 90s that takes place in the future - 2015 - and is about high schoolers piloting giant robots to fight colossal alien monsters. It is also kind of about the psychology of deeply emotionally damaged individuals, but the creator has also complained that people dig into it too much and that it isn't really that deep..? Dunno. Either way, it had a fairly big cultural impact here, so it is one that you see hints of randomly throughout Japan. Even so, a store right here? Well, we have to check it out, right?
+        </p>
+
+        <p>
+            If we had successfully gone down the ropeway yesterday, this wouldn't have been as much of a surprise. I had forgotten since seeing this when I crafted the itinerary, but there is a big part of the station at the bottom of the ropeway (where we didn't get to) with the same theme, including one of the big robots. Going inside and seeing the big <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_113719.jpeg">map </span>on the wall, we figure out why: Hakone is the series' setting. I knew it was in "Tokyo III,"" but had assumed incorrectly that it was just built on top of the ruins of Tokyo (I and II, I suppose). Neat! I'll have to rewatch with that in mind.
+        </p>
+
+        <p>
+            I enjoyed the show but I'm not a super fan, so most of the merch didn't speak to me. I still didn't have a stamp book though, and when I saw a notebook for 300 yen (less than $3), I figured that would do. It was sealed, so I only found out afterwards that it was lined inside, but that's fine. I hadn't seen as many stamps as I thought I would based on pre-trip research, anyway. I'd been so excited the day before at the Geomuseum because it had its own little stamp rally, and those were my first stamps, halfway through the trip. Don't worry, though, the Evangelion store itself had a stamp, big and glorious, to start my page. Stamp collecting is such a great way to scratch that collector's itch in a space- and budget-friendly way. I wish we had more of it. Also wayyyy more satisfying than just taking a picture on your phone. Tactile. Yeah. Anyway.
+        </p>
+
+        <img src="Japan Blog/Photos/NGE.jpeg" alt="my notebook and first stamp in it"><p></p>
+
+        <p>
+            While I perused, Jacob was looking at lunch options in the area. He found a café type place down the road, which, according to the internet, was run by two grannies and had the feel of something out of a Studio Ghibli movie. That worked for me, and we actually found it, and it was actually open! When does <em>that</em> happen?
+        </p>
+
+        <p>
+            It's cozy in <b>Cafe Asante</b>. There's some retro sound equipment (CD player boombox, karaoke machine?) next to us, and it certainly has a cozy vibe. We got some coffee, I got something with chicken, and Jacob got a hamburger (which are not typically served on a bun in Japan).
+        </p>
+
+        <img src = "Japan Blog/Photos/IMG_3255.jpeg" alt="Cafe Asante Lunch" /><p></p>
+
+        <p>
+            We finished there and headed back toward the station. We'd reached the end of the main commercial stretch of the street, anyway. Surprisingly, not much in the way of touristy souvenir shops. I figured there'd be a couple in the station. Nope, didn't end up finding any. Oh, well, it's been a good morning in Hakone. Time to leave. We got to the platform, which was pretty empty, probably because this train runs every 20 minutes. We then were greeted by… that family of four from California, who we were stuck with for a bit at a random bus stop yesterday! We really were on the same schedule but going in opposite directions (since they were going to Kyoto next). Glad they finally made it out of there. Small world.
+        </p>
+
+        <p>
+            <b>Odawara Station</b> ended up being confusing. It took a while to figure out how to get the tickets, and even then, I couldn't convince the darn kiosk to give me tickets to the station my phone was telling me to go to! I can tell you why in retrospect - the darn train lines are named the same thing. I got tickets on the Tokaido line for the Shinkansen, what's going on? Well, what I should've done was get tickets for the Tokaido Line - NOT shinkansen - obviously completely different. Figured that out JUST in time to make it to the Shinkansen platform instead of the other platform and board, in the final seconds of it being there. So we successfully got on the train we got tickets for and would get to the station our tickets said was our destination. Tokyo Station.
+        </p>
+
+        <p>
+            Being a bullet train, there is basically nothing to say about this ride. Kyoto to Hakone was the big stretch, this was nothing. Especially since it was the ~super express~ train. We were there in no time.
+        </p>
+
+        <p>
+            Time to completely derail from the Wanderlog itinerary and enter the Open World adventure of Tokyo. After exiting the station, we walked to - I think - Kanda station, just under a kilometer away in a straight line - to get on the <b>Ginza line</b>, which would take us to the station closest to our hotel. I was pleasantly surprised, once we got out of the station, that there were not many people and the air felt fresh.
+        </p>
+
+        <p>
+            Quick hiccup at that station: Jacob had swiped his IC card in addition to his shinkansen ticket back at Odawara, and used (just) the ticket to leave. The IC card thought he should be <em>exiting</em> from somewhere next, not entering. Fortunately, it was midday so there was a person working at the station, and once he understood what had happened and we presented the receipt from the shinkansen tickets, he was able to wipe that Odawara entry from the card. Easy fix. Diversion over! The Ginza line runs insanely often, like every 3 minutes, so this was fine.
+        </p>
+
+        <p>
+            We followed the signs and Google Maps to leave <b>Asakusa Station</b> via exit 8, which had a cartoon mole mascot, and voila, we were above ground again! It was a straight shot up the street to our hotel. Across the street to our left, we could see side entrances to <b>Senso-ji</b>, famous landmark and Tokyo's oldest Buddhist temple. We were staying just off its northeast corner at <b>Floral Hotel</b>.
+        </p>
+
+        <p>
+            Remember that luggage forwarding service we used wayyyy back when we first landed at the airport? Well, in the lobby, there was Jacob's checked bag, with mine nested inside of it, waiting for us as promised. Our room was ready so we got to head up and drop off our bags, which should be easy. The room is tiny and you can't put bags on tatami mats, however, so there was some Tetris skill required in here. The entry was similar to Kyoto, with the wood floor landing with a door/step up into the bathroom and a frame into the tatami section. Yeah… we'd figure out how to utilize the space efficiently later. Now it's time to head back outside for the rest of the day!
+        </p>
+
+            <img src = "Japan Blog/Photos/Japan - 368 of 485.jpeg" alt="Hotel Room in Tokyo">
+
+        <h2 id="Evening-1">
+            Late Afternoon: Asakusa (Senso-ji, Asakusa Shrine, Nakamise, Overlook, Asakusa Underground Street)
+        </h2>
+
+        <p>
+            The obvious first stop from our hotel is right around the corner, but closing time is coming up quick! We entered 
+            the <b>Senso-ji</b> plaza (for lack of a better word) and first went to the <b>Asakusa Shrine</b> (photo below, goshuin <span class ="modal-trigger" data-image="Japan Blog/Photos/asakusa shrine.jpeg">here</span>), which resides in the northeast corner. We then made our way up the steps to the <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_155617.jpeg">main temple</span>. We looked at the interior temple to Kannon, and got our goshuin (shown further down). Since we came up the side, it was on the way back down that we passed the huge <span class="modal-trigger" data-image="https://resources.matcha-jp.com/resize/480x2000/2022/02/25-123277.webp"><blu>Jokoro</blu></span>, or incense burner. There is a traditional belief that the smoke has a healing effect and there’s always a crowd. Now that we’re turned around, we also come face to face with the iconic <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3258.jpeg">five-story pagoda</span> of the temple complex - one of the most famous of its kind in Japan. It’s about the height of an 18-story building. 
+        </p>
+
+        <img src="Japan Blog/Photos/Asakusa_Shrine.jpg" alt="Asakusa Shrine" /><p></p>
+        <p>
+
+            Heading south through the temple gate, we enter the oh-so-crowded <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 378 of 485.jpeg">Nakamise Shopping Street</span>. Shops and street food line the way leading up to the temple. It’s exciting, but I’m averse to lingering here. Too touristy for my taste. Admittedly, maybe not the worst place for some souvenirs, even if I am sure that they overcharge based on location. Sorry not sorry. There was a fun moment when a big gust of wind came through and created a nice cloud of sakura petals. 
+        </p>
+
+        <p>
+            We exit the temple grounds area to what looks like a normal city corner. Fortunately, this corner holds my next destination: the <b>Asakusa Culture Tourist Information Center</b>. What the heck, Joe? You just complained about touristy spots and now you’re going to the tourist information center?! Fear not, we are not here for the information. We are here for the 8th story observation deck! Free entry and we have a clear sight of all of <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 379 of 485.jpeg">Senso-ji</span> to the north, and over the river to the east, the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3282.jpeg">Tokyo Skytree</span>. 
+        </p>
+        <p>
+            Great, we are quickly checking off my highlights for our hotel’s neighborhood! Last is the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3283.jpeg">Asakusa Underground Street</span>. It’s an underground arcade with shops and restaurants that is known for having a nostalgic vibe, retaining its character from the Showa Era (1926-1989). We were there a bit early, so most of the restaurants/bars hadn’t yet opened, but it had a cool feel. Like 80s cyberpunk, if you can make any sense of that. 
+        </p>
+
+        <img src="Japan Blog/Photos/20250409_170353.jpeg" alt="Asakusa Underground Street" /><p></p>
+
+        <p>
+            At first, we were confused about where to find that street. Remember our train station’s mole mascot? Turns out, it was right there. You just go down those stairs and turn left instead of right towards the station. So basically, we walked up and down this street and are at the subway station. It’s just past 5 PM, there’s daylight but it’s waning. Let’s go to <b>Electric Town</b>!
+        </p>
+
+        <h2 id="Evening-2">Evening: Akihabara (Ishibashi-inari Shrine, Mega-Store Shopping)</h2>
+
+        <p>
+            We took the <b>Asakusa Line</b>, which goes west to <b>Ueno</b> then curves south towards the neighborhood <span class="modal-trigger" data-image="https://japandeluxetours.com/uploads/2022/03/20220301091655_621e5507429fd.jpg"><blu>Akihabara</blu></span>, also sometimes known as Electric Town. We went one station past Ueno before getting off. It isn’t quite Akihabara yet, but it’s close. We are walking on a bustling city street and suddenly… hear monk chanting? It’s recorded audio, but still, it got pretty loud and came out of nowhere. We turned and there was a little shrine in one of the small spaces that were usually occupied by market stalls. I took a look and there was some signage, and it said something like “main shrine on second floor.” Alright, you’ve piqued my interest. But wait. This is such a tiny space. There is definitely no door to a stairwell or anything.
+        </p>
+             <div class="note"><strong>Editor's note:</strong> If I haven't mentioned Wanderlog yet, it is an app I used for planning out locations for this trip. Primarily, it was a map that I put a ton of pins on, and had categorized as Restaurants, Shrines, Shopping, etc. It helped me pull up directions on Google Maps, look at some pictures to remind me of what something was, or to see if we were nearby to anything else I was interested in before moving onto another area.</div>
+
+        <p>
+            Actually, this shrine was already pinned in my Wanderlog: <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 389 of 485.jpeg">Ishibashi Inari Shrine</span>. The map led me around the corner, where there was an outdoor staircase, framed by a torii gate. Sure enough, there’s a whole stonework pavilion tucked in this city block, with <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3287.jpeg">small shrines</span> and a main building. From post-trip research, I think the shrine was one of the small ones, and the main building was the Marishiten Tokudaiji Temple. It just appears like magic. And there are still people there, despite it being 5:45. We got the Goshuin there, and I browsed the most adorable <!-- Do I have a picture to insert here? --> Japanese boar goods. The main symbols here seemed to be the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3285.jpeg">boar</span>  and a gear-like icon (seen on their seal on the goshuin below). There were also <em>inari</em> foxes of course (see the "small shrine" photo), and one of those <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3288.jpeg">guardian lion statues</span>. Really nice! I got an <b>omamori</b> there as well: a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_6993.jpeg">purple good luck amulet with a heron and a turtle on it</span>. All the shrines have omamori but this was the first design that really stood out for me.
+        </p>
+
+        <img src ="Japan Blog/Photos/Japan - 384 of 485.jpeg" alt="Ishibashi Inari Shrine in Akihabara" /><p></p>
+        <img src = "Japan Blog/Photos/Sensoji Ishibashiinari.jpeg" alt="Goshuin" />
+        <p><em>
+            Goshuin: Senso-ji (left) and Marishiten Tokudaiji Temple/Ishibashi Inari Shrine (right)
+        </em></p>
+
+        <p>
+            Alright, I loved the quick teleportation to my boar shrine, but it was time to return to the city. Within 10-15 minutes, we reached <b>Akihabara</b>. My itinerary had us coming here after Ueno, so we were entering from the right direction. I had some stores pinned that would snake us north to south. 
+        </p>
+
+        <p>
+            First: <b>Akihabara Gachapon Hall</b>. I had watched a YouTube video that looked like fun where a couple split up for 15 minutes with limited coins and had a little competition to see who could find the capsule that was (a) the best and (b) the weirdest. Well, this was definitely not where they filmed it. Smaller and dirtier than expected. Next!
+        </p>
+
+        <p>
+            Second: <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 390 of 485.jpeg">Mandarake</span>. It’s something like six stories tall, and characterized by skinny aisles, usually with glass cases on either side housing its wares. It also boasted a large (secondhand?) bookstore, which is something Jacob is often searching for. It is hard to find books he can read, since his level is somewhere between baby books and actual books. There are certainly options. 
+        </p>
+
+        <img src = "Japan Blog/Photos/20250409_185305.jpeg" alt="Mandarake Bookstore in Akihabara" /><p></p>
+
+        <p>
+            If I’m not forgetting something in between, our next stop was a superstore: <b>Bic Camera</b>. This is no joke. Seven floors. They have everything. First 3 floors are computers and other electronics. Fourth floor is essentially a drug store. Fifth, cameras, binoculars, watches/clocks, luggage, stationary. Sixth, kitchen and bathroom appliances. Like, rice cookers and bidets. Seventh, toys and video games. That’s a lot of escalators. Naturally, we are most interested in the top floor. I did take a look at the watches. They were not discount watches. Oof. 
+        </p>
+
+        <p>
+            It also wasn’t discount toys on the top floor. They had those fancy, <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_191036.jpeg">higher quality figures</span> that you might be able to imagine in your head, but also probably basically never see in person. But they also had a variety of goods at different price points. We got a few random goodies here: Jacob got Dragon Quest spoons; I got a Ghibli "paper theater" craft and a cow-shaped beef-cut 3D puzzle with Japanese labels for Caitlin.
+        </p>
+
+        <img src = "Japan Blog/Photos/beef.jpeg" alt="3D beef cut puzzle from Bic Camera in Akihabara" /><p></p>
+
+        <div class="note"><strong>Editor's note:</strong> Throwback to my confusion at the Bic Camera in the airport, which did not feature anything like this, and was like any other cramped shop in an airport.</div>
+
+        <h2 id ="Night-1">Night: Dinner, Arcade</h2>
+
+        <p>
+            Just like that, it was 8:20 PM and we hadn’t had dinner. There was some mindless wandering, and we found some large building that looked like a mall, but might have been all restaurants? There was a big sign outside with each one’s name, style, and floor number. Alright cool, options. There were two Italian places, Chinese, an izekaya or two, and many more. You might be able to guess what comes next. 
+        </p>
+
+        <p>
+            Places are closed, or reservation-only, or we just can’t seem to find them. We did find a seat at a communal table in an <b>izekaya</b> but I was scared off so we left before any servers came over. Lights were bright, you had to get a drink, there are no entrees, options include weird things like horse tongue… not tonight. So we were searching for one of the other options and randomly found a Thai place instead. Checked out the menu and whew, relief.  Jacob had <span class="modal-trigger" data-image="Japan Blog/Photos/20250409_205758.jpg">pad thai</span> and I had… something good with chicken, peppers, onions, and cashews.
+
+        </p>
+
+        <p>
+            After that, we went into an arcade. Excitingly, Jacob noticed a sign in Japanese that said something about getting a free prize if it was your birthday, or something. It was literally the day after my birthday and I have ID to prove it- it’s worth a try! First employee we found at ground level told us to go to the service counter on the 3rd floor. They were already expecting us when we got there. Hooray, I won being born! (Later, I found the sign in English. It just had to be the month). I got the <span class = "modal-trigger" data-image="Japan Blog/Photos/IMG_3345.jpeg">grand prize</span>!
+        </p>
+
+        <p>
+            We often went through buildings from the top floor down, as was the case here, so we continued up to the top (4th) floor. There was some sort of <span class = "modal-trigger" data-image="Japan Blog/Photos/IMG_3301.jpeg">Jojo battle royale game</span> that I didn’t play, but noticed. Generally, we didn’t really end up playing so much as walking through and browsing. As you would expect, there was someone absolutely killing it on a Dance Dance Revolution-type machine (but with a bigger more complicated grid). 
+        </p>
+
+        <p>
+            Jacob did make a note early on that the sign specifically said <span class = "modal-trigger" data-image="Japan Blog/Photos/20250409_220836.jpeg">Taiko no Tatsujin</span> games were on the bottom floor, and that he wanted to play it. Did I know what that was? No. Did I recognize the mascot when I saw it? I think so, a little? It’s like a drum with a cat face. It’s a drumming rhythm game. You hit either the drum face or the edge based on the color, with one or both sticks based on the size. There were seemingly endless tracks to choose from, and a cruel timer limiting the browsing possible before song selection.  We put in our coins, which gave you three songs to play. I think I did alright for my first time? But I was exhausted after and even gave myself a nasty blister on the ball of my hand by my pinky. Ouch. 
+        </p>
+
+        <img src = "Japan Blog/Photos/20250409_220908.jpeg" alt="Taiko no Tatsujin arcade game in Akihabara" /><p></p>
+
+        <p>
+            Last stop of the night in Akiba was <span class = "modal-trigger" data-image="Japan Blog/Photos/20250409_224322.jpeg">Don Quijote</span>, another mega store. Its mascot is a penguin. Did I mention stores like this and Bic Camera also have their own theme songs? So catchy. Anyways, it was already after 10pm so Donki was pretty much the only place still open (this location was open 24 hours). We browsed a bit, but also noticed that despite the time, there was an intimidating number of people in line for tax-free checkout. And we were tired, so we decided not to get anything from Donki… this time. But oh, we’d be back. 
+        </p>
+
+        <p>
+            I also had to promise to Jacob that we would come back to Akihabara in general, since we did not satisfy the anime-based shopping requirements. I promised that based on our itinerary it should not be a problem to return. Especially since it is one of the neighborhoods closest to our hotel. 
+        </p>
+        
+
+        <p>
+            It was a super easy subway return to Asakusa as expected, and we ascended via the mole (exit 8) again. I wanted to take a slight detour and go a block over to the west before heading north. Now that it’s late, Sensoji is still lit and open, but much more quiet. It was great returning through that shopping street and having a much more leisurely time. We also got photos that would’ve been impossible with daytime crowds.
+        </p>
+
+
+        <img src = "Japan Blog/Photos/IMG_3317.jpeg" alt="Senso-ji at night 1" />
+        <img src = "Japan Blog/Photos/IMG_3328.jpeg" alt="Senso-ji at night 2" />
+        <img src = "Japan Blog/Photos/IMG_3341.jpeg" alt="Senso-ji at night 3" />
+        <p></p>
+
+        <p>
+            Not bad for Tokyo's busiest temple! Anyway, once we were done there, we were of course right next to the hotel, and able to go in and get ourselves a bit more settled. We have also reached an exciting point in our trip - we don’t have to wake up super early anymore! The fan acts perfectly as a white noise machine to help make the snores less jarring, too, so sleep here goes surprising well given the proximity. 
+        </p>
+        
+        <footer>
+            <!-- <p>✈️ End of Joe's Japan Diaries ✈️</p>
+            <p>April 3-13, 2024</p> -->
+        </footer>
+
+        <div class="navigation-buttons">   
+            <a href="day-4.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-6.html"><button>Next Day</button></a>
+        </div>
+
+    </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+    <script>
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>

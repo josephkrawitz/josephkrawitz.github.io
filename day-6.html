@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "🐼";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🐈 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🏮 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "☂️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🎋 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+            <h2 id="day-6">Thursday, April 10th: Tokyo 🐼</h2>
+
+        </header>
+
+        <img src = "Japan Blog/Photos/Japan - 429 of 485.jpeg" alt="Header Image: Tokyo Night Life">
+
+    <div class="navigation-buttons">   
+            <a href="day-5.html"><button>Previous Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-7.html"><button>Next Day</button></a>
+    </div>
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <!-- <li><a href="index.html#day-minus-1">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="#day-1">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</a></li>
+                <li><a href="#day-2">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="#day-3">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="#day-4">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="#day-5">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="#day-6">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="#day-7">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="#day-8">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="#day-9">Sunday, April 13th: Tokyo, New York ✈️</a></li> -->
+
+                <li><a href="#Morning-1">Morning: Doutor, Ueno Park, Zoo, Museums</a></li>
+                <li><a href="#Afternoon-1">Afternoon: Ueno Park, Lunch, Shinjuku</a></li>
+                <li><a href="#Evening-1">Evening: Shinjuku, Kabukicho, Gacha</a></li>
+                <li><a href="#Night-1">Night: Omoide Yokocho, Dinner, Laundry, Rain</a></li>
+
+            </ul>
+        </div>
+
+        <h2 id="Morning-1">Morning: Doutor, Ueno Park, Zoo, Museums</h2>
+
+        <p>
+            The plan for the morning was to take the brief train ride to Ueno Station and find a breakfast spot on our way towards the park/zoo. Once again, it is surprising how much Japan seems to hate breakfast. We found Doutor Coffee and had our breakfast and coffee. I was happy because it seemed like most of the people in there were Japanese businessmen having their coffee and working on their laptops, but I later found that Doutor is a pretty big chain. Aw well, still more unique than going to a Starbucks. Jacob had a brown sugar kokuto latte.
+        </p>
+
+        <p>
+            Retracing our steps, we just needed to cross the street and go up some more stairs before entering Ueno Park. The station is not especially close to the zoo, so we headed off in that general direction. Since it was on the way, we stopped at the Buddhist temple we stumbled on: <b>Kiyomizu Kannon-do Temple</b>. From its pavilion, you could see down into town through a (bonsai?) tree. They prepared their goshuin (seen further below) in the back inside the temple, so you were given a number like at a coat check, and there were a few seats to wait nearby. While we waited, we met a man who sounded British, but also spoke great Japanese. we got to talking; he is a software developer who works in Western Japan, so he was on vacation, but less far from home than he appeared.
+        </p>
+
+            <img src="Japan Blog/Photos/IMG_3354.jpeg" alt="View from Kiyomizu Kannon-do Temple in Ueno Park, Tokyo"/><p></p>
+
+        <p>
+            The zoo opens at 9:30, and we got there a bit after 10. Thankfully, it was not too crowded, so we got inside quickly. We got a map and quickly plotted our course toward the main event, the giant panda. On the way, we passed a few kinds of monkeys. <!-- does a picture go here? -->Then, we started ascending an incline leading to a bridge, and I realized that the map was <em>not</em> made to scale. This place is huge! There is an "east garden" and a "west garden" connected by this bridge, and each feels big enough that it would have been enough to feel like a full zoo worth the admission.
+        </p>
+
+        <p>
+            We finally made it down the other side and followed the map and signs towards Lei Lei's enclosure. We were getting close when we encountered a photo op spot, where they set you up in front of a panda background and take your picture to sell to you. Nobody was doing it at this point, but maybe they just got set up. They asked us to do it, I said we were good, thanks. They said it was free, I said well OK in that case why not. Free and no line. We did it and got a small (photobooth size or so) black and white print of our picture with a panda/zoo border. They also have the big color one for sale, no thanks have a good day! Though in hindsight it was probably only like 1000 yen compared to the $25 they probably charge in America.
+        </p>
+
+            <img src = "Japan Blog/Photos/zoo booth.jpeg" alt="panda photo booth" /><p></p>
+
+        <p>
+            We made it to the line to see the panda. It is pretty wild how they have it set up. The panda practically has a royal guard. Every minute or so, a buzzer makes a noise. At the front of the line, guests are segmented into groups of 10 or so. At the buzzer, the groups move forward one "station" or viewing segment. Once you've gone through, you're kicked out. The royal guard ushers you along with a big pole they use to keep everyone in their place.
+        </p>
+
+        <p>
+            This means you get about 4 minutes in the space closest to the glass. The panda is in charge of where she goes, so it's down to luck where she will be while you are in front. Unfortunately for us this morning, she felt like lounging on the roof of her little hut, making it exceptionally difficult to see her. We did see her though, if only fleetingly.
+        </p>
+
+            <img src="Japan Blog/Photos/IMG_6237.jpeg" alt="Giant panda Lei Lei lounging on her hut roof at Ueno Zoo, Tokyo"/><p></p>
+
+        <p>
+            Our way out takes us to the red pandas, and fortunately for us, it's feeding time! The zookeeper uses the food to have the pandas move around to the different parts of their enclosure for visitors to see. For an extra funny little show, they stick some to the glass at points along the wall. They have to get up on their hind legs for it. It's cute and entertaining and they get a treat! Everyone wins!
+        </p>
+
+        <img src="Japan Blog/Photos/IMG_6321.jpeg" alt="Red panda reaching up to get food from zookeeper at Ueno Zoo, Tokyo"/><p></p>
+
+        <p>There were also some very fancy birds nearby.</p>
+
+            <img src ="Japan Blog/Photos/Japan - 410 of 485.jpeg" alt="Lady Amherst's Pheasant at Ueno Zoo, Tokyo"/><p></p>
+
+        <p>Lady Amherst's Pheasant (above) and golden pheasant (below)</p>
+
+            <img src ="Japan Blog/Photos/IMG_6306.jpeg" alt="Golden Pheasant at Ueno Zoo, Tokyo"/><p></p>
+
+        <p>
+            We also went into the house of small mammals, which had both nocturnal and diurnal residents. Highlights included flying foxes, a very small but energetic kangaroo cousin (perhaps a Greater Egyptian Jerboa?), a spooky Pallas Cat, a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3363.jpeg">cuddle puddle of some baby mammals</span>, and a <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 414 of 485.jpeg">posing meerkat</span> just outside.
+        </p>
+
+        <p>
+            Good news - there was another table set up, and they had a set of stamps. Hell yes. They were inviting adults over, not just families with small children. Thank goodness. They gave a piece of paper with the zoo logo or something on it, and basically had a template so you knew where to go for each of the 3 stamps to make it fit. I did this, and this reminds me that I need to tape that into my notebook I mentioned before. Jacob instead stamped onto the zoo map, and since there were empty areas that were pretty much exactly the right size, it ended up looking really cool. Also, not to brag, but the zoo employees or volunteers or whatever were very impressed with how clean/nice ("kirei") my stamping skills were.
+        </p>
+
+        <img src = "Japan Blog/Photos/zoo stamps.jpeg" alt="Ueno Zoo stamp collection"/>
+        <p><em>
+            Translations from top to bottom: "Ueno Zoo Visit Memorial"; "Commemoration of Visit 4/10/25 Ueno Zoo"; "Giant Panda"; "Let's observe!"; "What kind of legs/feet do the animals in the stamp have?"</em>
+        </p>
+            <div class="note"><strong>Editor's Note: </strong><p>I think the machine translation is making that last one make less sense than it would in Japanese. Also, the small letters on top of the main words are to help kids who might not know all the kanji yet. We saw that in a few places, including for unusual words on plaques in museums. </p></div>
+
+        <p>
+            We realized that time was flying by, and we could <em>easily</em> spend the whole day at the zoo. Alas, we have so much to explore, and we have zoos at home. I told Jacob I'll take him to the Bronx Zoo so he can see some of the more exotic things we would be missing, since there wasn't much here that was specifically Japanese. The giant panda is what they're most excited to have, and we got to see one of them. Some quick other animals we got glimpses of, and that Jacob enjoyed: giraffe, <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 415 of 485.jpeg">flamingos</span>, shoebill, <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_6219.jpeg">prairie dogs</span> with American bison (we actually saw those guys at the beginning). We did have a conversation with one woman who was helping people to the end of the line to see the other panda, but the wait was 30-40 minutes so we decided we were satisfied with the one. Did I say we? She didn't speak English, so Jacob had the conversation. I just laughed along or got excited when I recognized a few words. But she was nice and seemed to have a nice time. It basically confirmed for us that while she had some exciting and cute recommendations, there weren't any particular native Japanese exhibits we were missing out on.
+        </p>
+
+        <p>
+            We skipped this side's gift shop and stopped at the one by the entrance/exit because I figured it'd be the main one and have everything but I think I was wrong. I ended up kinda underwhelmed by the selection. But I certainly wasn't going all the way back at this point. I got a <span class="modal-trigger" data-image="Japan Blog/Photos/zoo rag.jpeg">hand towel with the panda twins on it</span>. Jacob got a Birds of Japan field guide for mom and dad (or himself, if they don't find it useful because it's in Japanese). That might've ended up being it? I just wanted something with the panda. They love having pandas here and I love that for them.
+        </p>
+
+        <p>
+            Cool. Next up, art museum. There was a <span class="modal-trigger" data-image="Japan Blog/Photos/20250410_115140.jpg">reflective orb</span> as we approached that reminded me of the Chicago Bean. But we got there and the admission was kinda high, and the main thing is the rotating exhibition which was… a Spanish artist. Nah. We also skipped the <b>Museum of Western Art</b> for the same reason. It occurred to me that Ueno Park isn't (just) a foreign tourist spot, it's very much a domestic tourist spot. It's like Balboa Park in San Diego.
+        </p>
+
+        <p>
+            The next actual location was the <b>National Museum of Nature and Science</b>, which sounds dope. Like the zoo, this museum actual has two separate wings: one for the Japanese islands, one for global. As we established, we are here in Japan for the Japanese stuff. Unfortunately, it was difficult for me to take a lot out of the exhibits because there was very little English. But let's see, there was a <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 417 of 485.jpeg">blue whale</span> outside, that's a classic. We had some taxonomy of Japanese animals, including a bear, monkey, <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 418 of 485.jpeg">boar, and giant salamander</span>. There were big <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 419 of 485.jpeg">ammonite fossils</span> and a map of a ton of meteors that have hit and helped shape Japan (I think). There was a room with, uhh, clocks and telescopes and stuff? So yeah, a lot going on in here.
+        </p>
+
+        <p>
+            Also, it was here that we both realized that our feet or legs were KILLING us. This had to be the worst point of the trip for us pain-wise. So we barely made it to each room before sitting on a bench for a few minutes to recoup and plan what to do next, now that it was coming up on lunchtime. Jacob did some sleuthing and found a place with a signature regional dish that is some level of iconic. Sure.
+        </p>
+
+        <h2 id="Afternoon-1">Afternoon: Ueno Park, Lunch, Shinjuku</h2>
+
+        <p>
+            The area for lunch was basically back on the far side of Ueno Park again, so I plotted our course to head there while still seeing more things. We had a detour at <b>Shinobazu Pond</b>, a pretty spot in the park where you could see the city, the park, reeds and birds in the pond, and cherry blossom trees. There was also a…jetty? Some kind of narrow strip of land that takes you to what would otherwise be a small island in the middle of the pond. Along the way is street food, but all snack or dessert, nothing for lunch. At the island center was <span class="modal-trigger" data-image="https://rimage.gnst.jp/livejapan.com/public/img/spot/lj/00/01/lj0001940/lj0001940_56fc6fc5e0a2f_main.jpg?20230628051112&q=80"><blu>Benten Temple</blu></span>. Can you guess what we got while we were there?
+        </p>
+
+        <img src = "Japan Blog/Photos/ueno2.jpeg" alt="Goshuin from Ueno Park temples">
+        <p><em>
+            Goshuin from Kiyomizu Kannon-do Temple (right) and Benten Temple (left) in Ueno Park, Tokyo
+        </em></p>
+
+        <p>
+            We left the park and got to the shopping street with various casual restaurants, many with street touts outside, and did our customary little back and forth while looking up and down at our phones to figure out how we kept missing it. Classic. Anyway, we found it. <b>Monja Moheji Ueno</b>. That classic Japanese dish I alluded to is the <span class="modal-trigger" data-image="https://tblg.k-img.com/restaurant/images/Rvw/301006/640x640_rect_5f7d5f8936ad7f9650ad56e9f5ab5a4a.jpg"><blu>okonomiyaki</blu></span>, a savory pancake. This place's specialty, though they do both, is a regional variant called a <b>monjayaki</b>. What's the difference? Well… we tried to find out… ehhh… nobody there spoke English, and the waiter couldn't even really explain it <em>in Japanese</em>, so… trust that there is a difference in the art of how they make it. Hang on, I got a little ahead of myself.
+        </p>
+
+        <p>
+            It's not crowded. We say hi, it's the two of us. They inform us there is a seating fee and ask if that is ok. I said yes. Have I mentioned this yet? That's super normal in Japan. Usually you get a little appetizer or apparatif or whatever and call it even. And there's no tipping and it's a paltry sum so again, no problemo. Each table has a little grill on it, like you're at a mini hibachi.
+        </p>
+
+        <p>
+            We sat next to an older Japanese couple (maybe in their 50s?) in the back room. Again, everyone in there was very nice, but it really came down to Jacob's Japanese, because there was no English to be had. As we struggled to figure out what to get, our neighbors chuckled a bit. Not maliciously, just because it's cute seeing us try but basically speak at baby level. The woman even insisted on us trying a small bite of their monjayaki while we were trying to discern the difference in the dish styles.
+        </p>
+
+        <p>
+            I think we determined the okonomiyaki was larger, so we got that to share and figured we could order more if we were still hungry. Hooray, we get a little show of it being made. There was a lot of dual wielded chopping action for all the cabbage and stuff that goes into it. The texture was less like a western pancake, because it had all the stuff in it, it almost approached latke consistency on the inside. Anyways, that was lunch. Our day would continue by continuing south. Time for us to explore Shinjuku!
+        </p>
+
+        <p>
+            We teleported (by subway) to downtown Shinjuku, and I quickly find out that we are at a famous crossing. I <em>hear</em> the giveaway: a meow echoing through the streets. There is a corner billboard that makes a very impressive 3D illusion when viewed from the right angle, and it mostly features a cat doing random cat things throughout the day. That was fun to watch.
+        </p>
+
+        <img src="https://www.omnibusjp.com/shinjuku3dcat/img/mechanism_img_02.jpg" alt="3D cat billboard in Shinjuku, Tokyo"/>
+        <div class="note"><strong>Editor's Note: </strong>This picture from online, usually I only set photos in the page like this if I took them. I took a video of the cat, but it flickered due to the different frame rates and doesn't convey the illusion as well as this photo.</div>
+
+        <p>
+            We went to a store on Jacob's shortlist, called <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 421 of 485.jpeg">Books Kinokuniya</span>. It was another multi-story shopping building with a large variety of things, and honestly, not as many books or stationary options as Jacob was hoping for... in what we <em>thought</em> was the whole store. I don't think everything in the building was part of Kinokuniya, but a lot of it was! The best news is that it had a free <span class="modal-trigger" data-image="Japan Blog/Photos/books stamp.jpeg">stamp</span>! I never find those! Good thing my handy stamp book was on me!
+        </p>
+
+        <p>
+            Two minutes away was <span class="modal-trigger" data-image="https://www.japan-experience.com/sites/default/files/images/content_images/hanazonoshrine20191.jpg"><blu>Hanazono Shrine</blu></span>, another beautiful area hidden in the heart of the city up multiple flights of <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3386.jpeg">stairs</span>. We got our <span class="modal-trigger" data-image="Japan Blog/Photos/hanazono.jpeg">goshuin</span>, Jacob got an omamori (good luck charm), and I got an ema (wishing plaque). It reminded me of Fushimi Inari in its design, and that made me happy since I didn't get anything (other than the goshuincho) there, since we did the hike before any of the stores along the path were open. This shrine in Shinjuku even had a mini stretch of back-to-back Torii gates, where posers who hadn't already been to Kyoto were taking pictures.
+        </p>
+
+        <img src="Japan Blog/Photos/inari ema.jpeg" alt="Ema (wishing plaque) from Hanazono Shrine, Shinjuku, Tokyo"/><p></p>
+
+        <h2 id="Evening-1">Evening: Shinjuku, Kabukicho, Gacha</h2>
+        <p>
+            Next, we crossed back through the busy streets of Shinjuku to another very nearby landmark: 
+            <span class="modal-trigger" data-image="Japan Blog/Photos/20250410_190749.jpg">Kabukicho</span>. It’s a dense collection of alleys that lights up at nighttime. 6pm does not count as nighttime, since it wasn’t dark out yet. Minor bummer that everything was closed and we didn’t see the moody illumination. On the bright side, less crowded/claustrophobic, and more wholesome. This place is basically also the red light district equivalent, I think? And while Japan is a very safe country, there are supposedly street touts here who would lure you into shady bars which is not what we would have wanted! We got a good look and then returned to the main metropolis with our morality intact. 
+        </p>
+        <p>
+            Then, we found the best gacha store to date. It was very blue, and very clean. Way better than the last one 
+            we ventured into. We split up to explore and try to find the best and/or weirdest things. I had two 
+            great finds. I don’t remember if I mentioned this before, but just about every restaurant in Japan has 
+            extremely realistic plastic renditions of their meals to display in the window. I got a <span class="modal-trigger" data-image="Japan Blog/Photos/gacha food.jpeg">mini version of that</span>, and a <span class="modal-trigger" data-image="Japan Blog/Photos/pandapouch.jpg"><i>Panda Go Panda</i></span> coin purse.
+        </p>
+
+            <img src="Japan Blog/Photos/20250410_181655.jpg" alt="Gacha store interior"/><p></p>
+            <!-- see if jacob remembers what he got here? -->
+        </p>
+        <p>
+            We also walked through another place with silly claw machines. We did see someone do a decent 
+            job on one of the ridiculous setups that resembles a Jenga tower of snacks/candy, where you win 
+            whatever you can dislodge and cause to fall. 
+        </p>
+
+        <h2 id="Night-1">Night: Omoide Yokocho, Dinner, Laundry, Rain</h2>
+
+        <p>
+            A little after 7pm, we took a walk down a pretty alleyway called <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3398.jpeg">Omoide Yokocho</span>, aka Memory Lane. We found an izekaya called 
+            <span class="modal-trigger" data-image="https://res.cloudinary.com/magicaltrip/image/upload/v1522747307/3_1_l9fuxx.jpg"><blu>Omoide Torobako</blu></span>. We went up to the second floor, and as you’re meant to, we ordered a bunch of things. We had 
+            <!-- does Jacob know what kind of -->(alcoholic beverage), yakitori fried chicken skewers, grilled asparagus, and more!
+        </p>
+        <p>
+            After dinner, we took the train back to the hotel, but we had one more challenge before we were allowed to call it a day: laundry. We had decent enough directions to walk to the nearest coin laundry. We grabbed courtesy umbrellas a the lobby on our way out because the weather was turning and headed out.
+        </p>
+        <p>
+            We passed the 7/11, turned down a side street, and found the place. Eventually, we even figured out the Japanese washing machines. The one other person in there (a local) recommended the machines that wash AND dry, which was helpful. We got it started, and I had thought that since we were in the right direction, we should go down and do the <b>Sumida River walk</b> while we waited, instead of going back and forth. 
+        </p>
+        <p>
+            This was a silly decision. In part, it was great. We got a very moody view of the city with the rain and fog, which was cool. The downside is that by the time we made it to the river, it was absolutely pouring. Like, flash-flooding. Once we got there it basically turned into trying to loop back around as efficiently as possible. 
+        </p>
+
+        <img src="Japan Blog/Photos/IMG_3408.jpeg" alt="Rainy view of Tokyo Skytree from Sumida River walk, Tokyo"/><p></p>
+        
+        <p>
+            There was still too much time left to go straight to the coin laundry. We popped into that 7/11 this time, to get a well deserved snack for when we finally got home. Long story short, we got back there, got our clothes, and got back to the hotel without any additional incident. Time. For. Bed. 
+        </p>
+        
+        <footer>
+            <!-- <p>✈️ End of Joe's Japan Diaries ✈️</p> -->
+            <!-- <p>April 3-13, 2024</p> -->
+        </footer>
+
+        <div class="navigation-buttons">   
+            <a href="day-5.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-7.html"><button>Next Day</button></a>
+
+        </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+    <script>
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>

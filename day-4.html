@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "🚅";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🚠";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🚫 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "🍲 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🎋 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+                    <!-- <h2 id="day-minus-1">Thursday, April 3rd (Day -1) 🛫</h2> -->
+                    <h2 id="day-4">Tuesday, April 8th: Hakone ⛰️</h2>
+
+
+        </header>
+
+        <img src="Japan Blog/Photos/IMG_3091.jpeg" alt="Hakone Day Header Pic" />
+
+        <div class="navigation-buttons">   
+            <a href="day-3.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-5.html"><button>Next Day</button></a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#Morning-1">Morning: Shinkansen</a></li>
+                <li><a href="#Afternoon-1">Afternoon: Cable Car, Eggs, Geomuseum</a></li>
+                <li><a href="#Afternoon-2">Afternoon: Disaster Strikes</a></li>
+                <li><a href="#Evening">Evening: Run downhill for dinner!</a></li>
+            </ul>
+        </div>
+
+
+        <h2 id="Morning-1">Morning: Shinkansen & Other Trains</h2>
+        <p>
+            We were on the platform at Kyoto Station relatively early, to ensure we had time to have coffee and a breakfast (egg) sandwich from a small stall on the platform before boarding the bullet train, which arrived at about 8:30am. That's right, it was time to say goodbye to western Japan and head to the Fuji region. This was the Hikari bullet train, which is apparently the fastest one. Thanks to the bullet train's speed, it should only be about 2.5 hours for this cross-country stretch.
+        </p>
+
+        <p>
+            About two hours in, we knew that the view of <b>Mt. Fuji</b> must be coming soon based on our location. The window seats were all taken when we got our tickets, but I got us the next-best seats, knowing that it would appear on our left. Fortunately, my neighbor in the window seat was Japanese and graciously said it would be OK for me to use my camera at the window when it was time. Actually, this happened about 3 times, because neighbor kept getting off and being replaced at the next stop. But the express train only had so many stops. lol.</p>
+
+        <p>
+            Anyways, it really is exactly as they describe: Mt Fuji is shy. She is a massive presence but hides behind all the rolling hills in the way. So we are on the train, moving 175mph, and then you blink and BOOM, there she is.
+        </p>
+
+            <!-- <img src="Japan Blog/Photos/fujitrain.jpeg" alt="Mt. Fuji from Shinkansen" /> -->
+            <img src="Japan Blog/Photos/fujitrain2.jpeg" alt="Mt. Fuji from Shinkansen" />
+            <p></p>
+
+        <p>
+            After just a couple short minutes, the mountain was gone again. It really is a spectacular sight in person. Not too long after that, we arrived in <b>Odawara Station</b>. With our Hakone Freepasses activated, we got on the <span class="modal-trigger" data-image="https://www.snowmonkeyresorts.com/wp-content/uploads/2017/10/4757308_m-2.jpg"><blu>Hakone Tozan Railway</blu></span> up to <b>Gora</b>. This is a slow, steep climb up the mountainside; it was crowded with incoming tourists and got pretty warm. Partway through, I got talking to the moms with their kids standing by me. One was from Guam, but the other had an unmistakable LA accent. Lots of tourists we talked to were doing a similar route to ours in reverse, and this was the case for them. We traded some tips from our times in Tokyo and Kyoto respectively and it was very helpful to pass the time, because this train's novelty was running low by that point.
+        </p>
+
+        <p>
+            Once we got to <span class="modal-trigger" data-image="https://upload.wikimedia.org/wikipedia/commons/2/28/Gora_Station_-_Kanagawa_-_2025_June_29_various_01.jpg"><blu>Gora Station</blu></span>, it was a very quick walk to find our <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_6028.jpeg">Ryokan</span>, or traditional Japanese inn. Unfortunately, it was too early to check in, and they were already fully booked on the 7:15 dinner time, so we needed to take the 5:15. That was ok, they'd still hold onto our luggage and that would leave us with just enough time to do the full Hakone loop. Time to set back out! It's around noon.
+        </p>
+
+        <h2 id="Afternoon-1">Afternoon: Cable Car, Eggs, Geomuseum</h2>
+
+        <p>
+            To continue up from Gora station, there was not a "line" per se. It was more of a huddled mass of people hoping to ooze into the next car once it was vacated. It was another couple of stops to reach Sounzan Station, the first stop of the Cable Car line! Speaking of lines, this sure was bustling. We transferred to the small closed <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 282 of 485.jpeg">gondola</span> and headed up the rope way. Immediately, we were seeing the surrounding mountains. Soon, we could see the exhaust coming out the vents along the side of the volcano we were on. And then, for another brief glimpse, Fuji revealed itself. The cable cars fit four people each, so the couple we were paired with and us traded places and phones so that we could each get a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3063.jpeg">photo with Fuji in the background</span>.
+        </p>
+
+        <img src="Japan Blog/Photos/cable fuji.jpeg" alt="Mt. Fuji from Cable Car" /><p></p>
+
+        <p>
+            The <b>Owakudani station</b> is the top of the ropeway, and you have to get off and get in a different cable car to continue down the other side. That was the plan for our car-mates from the ascent, but I found that confusing - this is the top, with the volcanic activity and the geo museum and the famous black eggs! Surely you need to take the pit stop here before carrying on. In theory, I stand by that. In practice, it turns out that I was a FOOL!
+        </p>
+
+        <p>
+            First things first, we had to go to the Owakudani station restaurant for lunch; my itinerary demanded it and the timing 
+            worked out perfectly since it was now around 1:00pm. Cut to 1:30, and we are seated with their signature black curry and 
+            facing out a window with a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3070.jpeg">view of the volcanic valley and steam vents</span>.
+        </p>
+
+            <div class="note"><strong>Editor's note:</strong> For extra precision, I had the curry rice and beef cutlet and a ginger 
+                ale; Jacob had soft-boiled egg rice and curry with melon soda.
+                <img src="Japan Blog/Photos/IMG_3076.jpeg" alt="Owakudani Lunch - Black Curry and Beef Cutlet" />
+            </div>
+
+        <p>
+            We headed back down to ground level of the station, where we lined up to buy the amazing, the incredible, the <em>miraculous</em> black eggs, aka <b>kuro-tamago</b>! Actually, they request that only one person per group stand in line, to keep it moving. Anyway, the eggs. They are boiled in the iron/sulfur-containing waters of the volcanic valley, and eating one is supposed to increase your lifespan by 7 years! At 500 yen for a pack of 4, that's an absolute steal! Apparently <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3081.jpeg">Hello Kitty</span> loves them too; perhaps that explains her longevity in the mainstream.
+        </p>
+
+        <p>
+            Anyways, we went into the <span class="modal-trigger" data-image="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/69/a9/6e/very-small-but-worthwhile.jpg?w=1200&h=-1&s=1"><blu>Hakone Geomuseum</blu></span> next, which is located right next door. It's a small guided path with English and Japanese that teaches you about the area, the equipment used here, etc. It was pretty good, and I probably perfect for kids. It doesn't overstay its welcome, it has hands-on exhibits, a room for coloring in the <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 299 of 485.jpeg">Hakone mascot</span>, and a <span class="modal-trigger" data-image="Japan Blog/Photos/hakone geo.jpeg">stamp rally</span> as you progress through the hall. Nice! At long last, I found some stamps! That was on my list! Jacob was also happy to take photos of the signs so that, at a theoretical future date, he could translate it and earn about Japanese geology.
+        </p>
+
+        <p>Once we were out of the museum, we headed up the little pathway to see what else there is to do up here. There was 
+            basically just a convenience store and the entrance to the nature walk, which is not open to the public. Oops, bummer. 
+            We stood at the overlook to the valley with all the steam vents and boy, it was windy out there!</p>
+
+        <p>Now for some serious business. Eating a black egg. We weren't sure at first if there was a specific way to eat it. However, 
+            I did know <em>where</em> I wanted to eat it: in front of the statue of the great <b>Kuro-Tamago</b> (egg) itself.
+        </p>
+            <img src="Japan Blog/Photos/Japan - 297 of 485.jpeg" alt="Kuro-Tamago Statue" /><p></p>
+        <p>
+            After much consideration, I can tell you with confidence that it…is a hard-boiled egg. The shell is black. You peel the 
+            shell before you eat the egg. And then it's just an egg. I mean, eggs are a delicacy in our current American economy, but 
+            it was still a tad bit disappointing. Oh well. 2:30, a good time for a snack, and that's it for this stop. It was time to get on the cable car and get off this mountaintop. It gets cold all the way up here!!</p>
+        </p>
+
+        <h2 id="Afternoon-2">Afternoon: Disaster Strikes</h2>
+
+        <p>
+            Well… that was the idea. Remember how I mentioned that it was windy a moment ago? Well, I wasn't exaggerating. A man in a high-vis vest made an X with his arms and prevented us from even entering the station. He didn't speak English but it sent a pretty clear message. Jacob translated to get more of the details. The cable car had been suspended due to the high winds. We would have to take the bus down instead.
+        </p>
+
+        <p>
+            Bummer, but that's ok, at least we got to take the fun way up. The cable car normally runs constantly, and this is a 
+            super popular tourist stop along the advertised Hakone loop, so the bus should be super easy and just as convenient.
+        </p>
+
+        <p>
+            Well, it is scheduled to come every 20 minutes or so, and isn't operated by the same transportation company so the fare isn't covered by the Freepass. Alright, whatever, we have our Suica cards and don't mind spending a couple of bucks on a bus fare down to Lake Ashi, where we would switch onto the pirate ship scenic cruise across the lake.
+        </p>
+
+        <p>
+            Well, actually, the cruise was also closed due to the winds. But we could take a bus or walk along the lake and it would still be beautiful, and we would still have time to complete the loop and get back just in time for our dinner reservation.
+        </p>
+
+        <p>
+            Well…that's not what happened, either. There are two buses, corresponding with the two directions you can head down the ropeway. As more people finished up here, both lines got longer and longer. And the buses… didn't arrive.
+        </p>
+
+        <p>
+            I won't bore you with the details of waiting in this line for hours, teeth chattering in the wind, watching charter buses come and go (but nothing come for us), with no access to taxis or other alternatives. But by the end, people were leaving to walk down the mountain, and if I knew how long we would be standing there, I would've opted to do that walk as well. I'll also tell you that we waited there until it was past the time the last bus of the day was supposed to come, and a Japanese woman we were near literally called the transportation company to confirm that buses were still coming. (She is also how I knew we couldn't get taxis)
+        </p>
+
+        <p>
+            We didn't make it onto the first bus to appear, either. We were the second party in line for the next one. At this point, we were also out of time to do the loop and just needed to get back to the hotel. However, switching to the other bus was a no-go because we would then be at the back of the line, and there were probably enough people to fill 3 buses there. Assuming the buses would come empty, which they weren't. So we just had to take this one towards the lake and figure out where to get off and transfer. Anything to get out of this wind.
+        </p>
+
+        <p>
+            The next bus arrived. Virtually nobody got off. Jacob and I were barely allowed on. We were standing on the yellow bar that indicates where to stay clear so the door can safely open and close. It was wild. By the way, everything took way longer than it should because all the confused tourists tried to use their Freepass, which were not valid for these buses as I mentioned earlier. The bus drivers don't speak English well enough to explain, so it always became a whole thing. Anyways.
+        </p>
+
+        <p>
+            We got off after a couple uncomfortable stops. We were near one of the midway stops of the cable car, and Google Maps seemed to say that station was where we would get on another bus to take us closer to our hotel. We walked over. Admittedly, it was way more comfortable here than at just a bit higher elevation, now that we were amongst trees etc. The station was completely, eerily empty. Finally, a singular employee emerged, and in Japanese relayed to Jacob, essentially, that we were incorrect, the bus stop was… well, where we just were. We just needed the one on the opposite side of the street from where we got off. Ok fine, it wasn't a long walk and we had enough time to spare for this excursion.
+        </p>
+
+        <p>
+            Actually, we had more than enough time, because sure enough, this bus didn't show up either. We were joined by another family of four, with kids who seemed to be around our age, maybe a little younger. They were also from the west coast, and the girl was by far the most chatty with us. They also were going from Tokyo to Kyoto via Hakone.
+        </p>
+
+        <p>
+            Well, a couple minutes after the <em>next </em>bus was scheduled, one showed up. Spoilers, it was also packed. Sorry new friends, we only barely convince this driver to let the two of us on. Good luck, sayonara!
+        </p>
+
+        <p>
+            Where did this bus bring us? Err, in the right direction, but not all the way to Gora. We got off at the closest stop we were going to get, and would have to re evaluate again. It's already after 5:30 at this point. I've messaged the hotel multiple times throughout the afternoon, since we got stuck, but they never replied. The map said that it was basically a straight shot to our hotel, but it was essentially a little over a mile of steep downhill. Ok. It's the kind of slope where I naturally fall into a run to keep up with gravity. Hey, if I have to run a mile, this is the fastest and easiest way to do it. Weeeeee.
+        </p>
+
+        <img src="Japan Blog/Photos/Japan - 302 of 485.jpeg" alt="Hakone Run Downhill to Ryokan" />
+
+        <h2 id="Evening">Evening: Run downhill for dinner!</h2>
+
+        <p>
+            At last, we made it back to the ryokan. I did an antsy dance as the old ladies ahead of us in line to check in took their sweet time. I pulled out my phone to show the translated message I prepared on the last bus. It said something along the lines of "We are so sorry for being late. We were trapped on top of the mountain for 3 hours with no bus or way down. It has been a difficult day. Please let us still enjoy your wonderful meal." They said of course, and told us to go straight to the restaurant and do the actual check-in after.
+        </p>
+
+        <p>
+            Well, if you recall, they had the second set of dinner reservations at 7:15. So they told us our stuff was prepped and we could still do it, but asked us to confirm that it should be OK for us to be done by 7. We agreed not to be too leisurely. An hour should be enough. And we did squeeze the full course into that time, without rushing too much. You can tell it was fancy because I had no idea what anything was, basically. We also ordered a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3093.jpeg">Sakura rosé</span> to go with the dinner, and that was delish.
+        </p>
+
+        <p>
+            <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3088.jpeg">Jacob</span> had beef shabu shabu, which is like a beef hot pot with broth that you put the beef and vegetables into. Apparently, there was an art to the hot pot that was not quite grasped, as Jacob kept overcooking the beef. There were multiple courses, though: <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3099.jpeg">fried veggies</span>, miso soup, <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3100.jpeg">pork</span>, etc, to name a few. Not to mention the appetizer (below), some <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3096.jpeg">fish</span>, and our <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3102.jpeg">dessert</span>.
+        </p>
+
+            <img src ="Japan Blog/Photos/IMG_3092.jpeg" alt="Hakone Ryokan Dinner Appetizer" /><p></p>
+
+        <p>
+            Okay, it's 7:05 PM when we are fully finished, and I'm exhausted. Let's finally get to our <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3104.jpeg">room</span>.
+        </p>
+
+        <p>
+            Yeah, that looks nice and spacious. Next time, I'm spending more time in the hotel if I have one this fancy. I put on my <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 318 of 485.jpeg">yukata</span> (casual kimono). Jacob went for a walk. I enjoyed the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3169.jpeg">open-air cedar tub</span> with a nice hot bath checking in at 40 Celsius.
+        </p>
+
+
+        <p>
+            I fell the heck asleep. It was after Jacob returned but he still had plenty to do. Fortunately, I was exhausted enough not to be woken up by noise for at least a few hours. Turns out, he really liked wearing the <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 320 of 485.jpeg">samue</span> the hotel provided. It is still in the kimono style spectrum, but it is more like what a monk would wear while doing chores. Contemporary use is loungewear/pajamas. It became his mission to buy a set. We did also talk strategy for the following day before I went to sleep, although things weren't 100% set in stone yet. That's ok. It's been a hectic few days. Sleep is in order. It's the last night for a bit that I have a real bed.
+        </p>
+
+        <footer>
+        <div class="navigation-buttons">   
+            <a href="day-3.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-5.html"><button>Next Day</button></a>
+        </div>
+        </footer>
+    </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+    <script>
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>

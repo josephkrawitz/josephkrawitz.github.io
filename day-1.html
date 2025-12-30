@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "🦊";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "☕";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🍜";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "🌸";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🍗";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+            <h2 id="day-1">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</h2>
+        
+        </header>
+
+        <img src="Japan Blog/Photos/IMG_5376.jpeg">
+<div class="navigation-buttons">   
+            <a href="day-0.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-2.html"><button>Next Day</button></a>
+        </div>
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <!-- <li><a href="index.html#day-minus-1">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="#day-1">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</a></li>
+                <li><a href="#day-2">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="#day-3">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="#day-4">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="#day-5">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="#day-6">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="#day-7">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="#day-8">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="#day-9">Sunday, April 13th: Tokyo, New York ✈️</a></li> -->
+
+                <li><a href="#Morning-1">Early Morning: Fushimi Inari Taisha</a></li>
+                <li><a href="#Morning-2">Morning: Breakfast, Tofukuji</a></li>
+                <li><a href="#Midday">End of Morning / Early Afternoon: Sanjusangendo and Lunch</a></li>
+                <li><a href="#Afternoon-1">Afternoon: Kodaiji, Hokanji, Kiyomizudera</a></li>
+                <li><a href="#Evening">Evening: Dinner</a></li>
+
+            </ul>
+        </div>
+
+        <Img src="Japan Blog/Photos/IMG_2778.jpeg" alt="Kyoto hotel">
+        
+        <h2 id="Morning-1">Early morning: Fushimi Inari Taisha</h2>
+        <p>We awoke at the booty crack of dawn. That was 5 for me, 5:30 for Jacob, and out of the hotel before 6. Found our local train station and hopped down to 
+            <span class="modal-trigger" data-image="https://onb-cdn.b-cdn.net/images-stn-kyoto/inari_station.jpg"><blu>Inari station</blu></span> 
+            (one or two stops). We saw our first <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_2780.jpeg">big red gate</span> 
+            at 6:15, pointing us in the definitive correct direction. Then, up the stairs to the <span class="modal-trigger" 
+            data-image="https://www.agoda.com/wp-content/uploads/2024/07/Fushimi-Inari-Shrine-Kyoto-Japan.jpg"><blu>main pavilion</blu></span>. On the far 
+            side, we found the start to the path, and we were walking through the first few of the thousands of gates by 6:30 AM. It's 
+            incredible what can be done without coffee. And thank goodness, while we certainly weren't all alone, it really wasn't crowded. 
+            We made it in time to have some breathing room the whole way up!</p>
+        
+        <img src="Japan Blog/Photos/IMG_2784.jpeg" alt="Fushimi Inari Taisha Gates">
+        <img src="Japan Blog/Photos/IMG_2812.jpeg" alt="Fushimi Inari Taisha Gates">
+
+        <p>The gates are a cool spectacle and all, but that is only a small part of what is in this huge Fushimi Inari area, and it's 
+            the only thing you ever see on social media. It's not a straight shot up the mountain. There are stops along the way, 
+            sometimes with a shop and splitting paths, usually with a shrine. There are whole areas to explore that are densely 
+            populated with smaller red gates but also stonework and statues and shrines, laid out in a way that from my American 
+            experience is hard to compare to anything but a graveyard. We saw a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_5369.jpeg">
+                random cat</span>, a <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 9 of 485.jpeg">heron</span>, 
+                and heard lots of birds, mostly crows. And oh boy, there are a lot of steps.</p>
+
+        <div class="note">
+            <strong>Editor's note:</strong> Steps become a major theme on this trip. Little did I know…
+        </div>
+
+        <img src="Japan Blog/Photos/fush1.jpeg" alt="Fushimi Inari Taisha">
+        <img src="Japan Blog/Photos/fush2.jpeg" alt="Fushimi Inari Taisha">
+        <img src="Japan Blog/Photos/fush3.jpeg" alt="Fushimi Inari Taisha">
+
+        <p>When we reached the part where the path splits and becomes a loop to get to the shrine at the top of Mt Inari, you get to 
+            see a beautifully wide <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_5397.jpeg">view of Kyoto</span> 
+            from above. I have heard that this is a turning around point for many people. But why 
+            live with the FOMO? We pressed on. Oof the last section is easily the hardest. But we did it!</p>
+        
+        <img src="Japan Blog/Photos/IMG_2806.jpeg" alt="Fushimi Inari Taisha peak">
+
+        <p>And wow, by the time we got back down to that overlook turning point, it was packed. It was busy the rest of the way down, 
+            and the entry plaza had come to life. Markets were open and people were everywhere. We did a quick scan for breakfast food, 
+            and while there were some street food vendors and it was not even 8:30 in the morning yet, it was not breakfast food. 
+            We returned and got in line for the <span class="modal-trigger" data-image="Japan Blog/Photos/Fushimi Inari Taisha.jpeg">goshuin</span>, the temple and shrine stamp/calligraphy mark of your pilgrimage to the site. It opened at 8:30 and moved nice and quickly. We got our <b>goshuincho</b>,
+            <!-- We got our <span class="modal-trigger" data-image="https://m.media-amazon.com/images/I/71elrAmYpQL.jpg"><blu>goshuincho</blu></span>,  -->
+            the book specifically for recording these pilgrimages, and with that, we had concluded our business at Fushimi Inari Taisha.</p>
+            <img src = "Japan Blog/Photos/goshuincho.jpeg" alt="goshuincho">
+            <p>
+                <em>
+                    Note: Japanese books are read from right to left, so the front cover is on the right side.
+                </em>
+            </p>
+
+        <h2 id="Morning-2">Morning: Breakfast, Tofukuji</h2>
+        <p>We set off via side walkway as we headed for our next destination, which would require walking through some residential areas. 
+            It was a very nice neighborhood, the houses looked amazing there. Almost immediately we were greeted by some tiny Totoro guys 
+            on someone's retaining wall! Kawaii!</p>
+            <img src="Japan Blog/Photos/IMG_2816.jpeg" alt="Totoro figurines on wall">
+
+        <p>It was truly amazing how quickly we transitioned out of one of the most famously tourist-filled landmarks in the city, 
+            if not the country, into quiet, intimate side roads. I love how ingrained the shrines and temples are into the real, lived-in 
+            neighborhoods, and that we could see both sides of the city without any hassle.</p>
+
+        <p>This walk brought us to <b>Tofukuji Temple</b>, which I heard about in two separate posts about "hidden gems" of Kyoto. 
+            That was absolutely accurate. It is a huge grounds, and it was practically empty! It's really amazing how little off the beaten  path you need to get to escape the tourist crowds. This temple is known for its huge, historic gate, a garden, and a tranquil all-wood bridge. Side note, our hotel's nearest train station was the Tofukuji Station.</p>
+
+            <img src="Japan Blog/Photos/IMG_2817.jpeg" alt="Tofukuji Temple"><p></p>
+
+        <p>Alright, it was after walking around here that we realized we still hadn't had breakfast or coffee (I think we each had a 
+            small granola bar at a midway stop along Fushimi inari). We found a small place that was in the direction of both our hotel 
+            and our next stop. Jacob tried to figure out which direction that was, and I took advantage of this quiet moment to give 
+            Caitlin a quick phone call. We went to
+              <span class="modal-trigger" data-image=
+            "https://fishappyworld.com/wp-content/uploads/2024/01/Bread-Coffee-Hirarinto-パンとコーヒーとひらりんと・・・ssIMG_5121.jpg"><blu>Bread & Coffee Hirarinto.</blu></span>
+              
+              It was a restaurant, but it had the feel of being invited into someone's home. It was the first place we had to take off 
+              our shoes other than our hotel room. We took a table (there were 
+              <span class="modal-trigger" data-image="https://jlifeinternational.com/cdn/shop/files/JLIFETatamiLife_24_Takenomori_002.jpg?v=1742239290&width=1445"><blu>tatami</blu></span>
+              mats, where you sit on the floor, in the next room). The space had lots of stuff around, on the sills and shelves and 
+              walls, in a way that felt cozy. Staff were friendly. I think this was also the first place Jacob actually used some 
+              Japanese. Our tag team strategy is that I need to engage the person and then pass it over to him and it ends up working 
+              pretty well.</p>
+
+        <p>After that, we had a brief stop back at the hotel room. I changed my shoes from the hiking sneakers to my slip-ons, which would turn out to have some pros and some for the rest of the day.</p>
+
+        <h2 id="Midday">End of Morning / Early Afternoon: Sanjusangendo and Lunch</h2>
+        <p>Our next real stop was  
+            <span class="modal-trigger" data-image="https://www.travelcaffeine.com/wp-content/uploads/2018/02/sanjusangendo-temple-higashiyama-kyoto-japan-282.jpg"><blu>Sanjusangendo Temple</blu></span>
+            , which boasts 
+            <span class="modal-trigger" data-image="https://www.worldhistory.org/img/c/p/1200x900/6754.jpg"><blu>1001 life-sized wooden statues of the goddess <b>Kannon</b></blu></span>. 
+            Despite them all being of the same figure, sort of, they're actually all slightly different and have their own names and 
+            features. They're all documented and organized and itemized in a very impressive museum-like way, despite looking like 
+            they've always been there. I'm blanking on the word that I'm trying to think of right now. It was good archival work. Jacob 
+            made the comparison to the air temples in <em>Avatar: the Last Airbender</em>, with the statues of all the previous 
+            incarnations. Also, in the front on either end, there are the wind and thunder god, respectively, there to protect them. 
+            Along the front are 20-something additional statues of other Figures and there were descriptions in front of them as well. 
+            Photography was not allowed inside the temple. The grounds had a nice tidy little zen 
+            garden and smaller periphery shrines.</p>
+
+            <img src="Japan Blog/Photos/IMG_5417.jpeg" alt="Sanjusangendo">
+            <img src="Japan Blog/Photos/IMG_2824.jpeg" alt="Sanjusangendo">
+            <img src ="Japan Blog/Photos/sanju and kodaiji.jpeg" alt="Sanjusangendo and Kodaiji">
+
+            <p>
+                <em>
+                    Note: Goshuin from Sanjusangendo (right) and Kodaiji (left), which is visited later in the day.
+                </em>
+            </p>
+            <p></p>
+        
+            <p>
+                Lunchtime comes next, and this is where we get a bit derailed. We took the train up to <b>Gion-Shijo Station</b>. The thing 
+                people tell you about Gion is that it is the 
+                <span class="modal-trigger" data-image="https://www.touristinjapan.com/wp-content/uploads/2019/04/gion-district-geisha.jpg"><blu>geisha district</blu></span>. To me, this implied a historical preserved street. Nope, this is their 5th Avenue. Retail stores and crowds and tourists (oh my!). <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_2827.jpeg">Nishiki Market</span> is a long hallway (shopping arcade) where you can, in theory, stop without getting shoved by the sea of people flowing through and get some overpriced street food - that you have to eat standing up next to the shop that sold it to you. I took a lot of psychic damage here. 
+            </p>
+
+        <p>
+            We decided that (a) we would not be going out of our way to the Kyoto Pokémon Center to look for a hard-to-find plushie for 
+            Jacob’s friend, (b) the so-called samurai museum was an absolute tourist trap that would only be worth it if you had a 10 
+            year old son, and (c) the manga museum was too far and we needed food. But of course, we also need somewhere that works for 
+            a more sensitive palate, so we couldn’t just blindly pop in anywhere. Jacob found some places on his phone that either 
+            seemed sketch in person or had lines down the block. One place we went looking for was down an alley that had multiple tiny 
+            restaurants, and was closed. In that alley, my eye was caught by 
+            
+            <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_2830.jpeg">
+            “Tel Aviv,”</span>  but unfortunately, they were closed until 
+            dinner time. Next door, however, was a hole in the wall with a total of six stools, Menya Totaro, run by a man named Hiro 
+            and his wife. Hiro is funny and used to be a big time marketing consultant with expertise in behavioral psychology. Their 
+            specialty is a Hokkaido-style ramen-adjacent dish. It tasted good, the kind of broth was way lighter than ramen, and the 
+            company was excellent. Only problem is that something in the food would end up not sitting well with either of us. Oops.
+        </p>
+        <img src="Japan Blog/Photos/IMG_2832.jpeg" alt="Menya Totaro Ramen">
+
+        <h2 id="Afternoon-1">Afternoon: Kodaiji, Hokanji, Kiyomizudera</h2>
+        <p>
+            We had the long trek back out of this district to head back towards my original itinerary’s path. We entered <b>Kodaiji Temple</b>, another quite popular one. It’s a very large plot of land and is known for its gardens. It has an especially famous weeping cherry tree in the zen garden, and holy moly, it felt magical to be visiting at the perfect time to witness it in bloom. There was also a brief bamboo path, giving us a first taste for an experience more popular in tomorrow’s destination region. 
+        </p>
+        <img src="Japan Blog/Photos/IMG_2834.jpeg" alt="Kodaiji Temple">
+
+        <p>
+            We were in the bustling tourist area right around now, where there are some heavy hitters you’ll find in any Kyoto travel 
+            blog. The next major stop was <b>Kiyomizudera</b>, one of the most iconic views on this list so far (perhaps besides the gates at Fushimi Inari). The way there consisted of an uphill walk via the bustling pedestrian street of <b>Sannenzaka</b>, where you could turn around and be rewarded with a nice view of the also-iconic <b>Yasaka Pagoda</b> (Hokanji Temple). 
+        </p>
+        <p>
+            From there, we navigated the crowded plaza, climbed some more stairs, and ended up walking all around Kiyomizudera. It had 
+            nice <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 68 of 485.jpeg">sakura</span> (cherry blossoms), 
+            and while it is good looking out from the higher elevation, I don’t have too much to say about it. The entirely wooden structure supporting it was cooler to view from the bottom and up close. 
+        </p>
+        <img src="Japan Blog/Photos/IMG_2860.jpeg" alt="Kiyomizudera Temple">
+        <img src="Japan Blog/Photos/IMG_2848.jpeg" alt="Kiyomizudera Temple">
+        <p></p>
+        <p>
+            Because we were early to Fushimi Inari, Kiyomizudera was by far the most crowded place that we visited today. Fortunately, they also had their <span class="modal-trigger" data-image="Japan Blog/Photos/kiyumizodera.jpeg">goshuin</span> line down to a science. Once we identified the line, it moved quickly. It started outside, and led into a small building with a few booths, each with a monk stamping and writing. Souvenirs were handled in a separate area, so this was efficient and relatively quick.
+        </p>
+
+        <h2 id="Evening">Evening: Dinner</h2>
+        <p>
+            At this point it were approaching 5pm, which meant we weren’t able to make it to the last two stops on my list, which closed at 4:30. We headed back to the hotel for some sorely needed rest. After these two days, my feet were wrecked, not to mention my shoulders and neck from the backpack and camera. Jacob wasted no time falling asleep, and I looked into options for dinner. Food has been really tough to successfully plan and execute in Kyoto. I got us reservations (possibly overkill but I didn’t know that at the time) to a mostly-fried chicken-focused sit-down restaurant within/attached to Kyoto Station called <b>Furaibo Kyotoabantiten</b>. I wrote the outline of today so far after waking Jacob up, while he got ready to go back out.
+        </p>
+        <p>
+            We got a set dinner, which was mostly good. The tiny octopus things were off putting. The hot sauce tofu was good. And the 
+            pickled veggies (forgot the details) were the last of the set of 3 tiny things making up my “first course.” There was also 
+            <span class="modal-trigger" data-image="https://centrip-japan.com/article/img/1323/oden_03.jpg"><blu>haccho miso oden</blu></span>, stewed vegetables (traditionally). Three components in there: radish, tofu, and konjac, which is 
+            apparently a food that exists. Then there were chicken wings, delish, and lastly, they brought out fried chicken on a skewer. It technically wasn’t yakitori but I assume they are similar. A glass of draft beer was also included. We had some fun conversation with the couple next to us, although they didn’t speak English so I could only participate so much. The girl was telling us what some of the food was, which is how we found out about konjac…she said it in Japanese (spoiler: it’s the same as in English), we didn’t understand, so she translated to English on her phone, and we still didn’t understand until googling it. So that solved that mystery. Another funny thing here was the instructions with pictures explaining <span class="modal-trigger" data-image="Japan Blog/Photos/20250405_202414.jpg">how to effectively eat fried chicken wings</span>.
+        </p>
+        <p>
+            After dinner, most of the shops in the station were nearing closing time, so we did a quick perusal until then before returning to the hotel.
+        </p>
+
+    <footer>
+        <div class="navigation-buttons">   
+            <a href="day-0.html"><button>Prev. Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-2.html"><button>Next Day</button></a>
+        </div>
+        <!-- <div class="toc">
+            <ul>
+                <li><a href="index.html">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="day-1.html">Saturday, April 5th: Eastern Kyoto (Higashiyama) 🦊</a></li>
+                <li><a href="day-2.html">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="day-3.html">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="day-4.html">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="day-5.html">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="day-6.html">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="day-7.html">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="day-8.html">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="day-9.html">Sunday, April 13th: Tokyo, New York ✈️</a></li>
+            </ul>
+        </div> -->
+    </div>
+    </footer>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+    <script>
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>

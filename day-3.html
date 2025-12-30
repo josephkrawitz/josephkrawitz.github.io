@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "🦌";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🌸";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "⛩️";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "🐢 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🥢 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+                     <h2 id="day-3">Monday, April 7th: Nara 🦌</h2>
+
+        </header>
+
+        <img src="Japan Blog/Photos/IMG_5909.jpeg" alt="Nara Day Header Pic" />
+
+<div class="navigation-buttons">   
+            <a href="day-2.html"><button>Previous Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-4.html"><button>Next Day</button></a>
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <!-- <li><a href="index.html#day-minus-1">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="#day-1">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</a></li>
+                <li><a href="#day-2">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="#day-3">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="#day-4">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="#day-5">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="#day-6">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="#day-7">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="#day-8">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="#day-9">Sunday, April 13th: Tokyo, New York ✈️</a></li> -->
+
+                <li><a href="#Morning-1">Early Morning: Nara Park, Kofukuji</a></li>
+                <li><a href="#Morning-2">Morning: Yoshikien Garden, Todai-ji</a></li>
+                <li><a href="#Morning-3">Noon-ish: Kasugataisha</a></li>
+                <li><a href="#Afternoon-1">Afternoon: Lunch, Gangoji, Sarusawa-ike Pond, Shopping Streets</a></li>
+                <li><a href="#Evening">Evening: Shopping Streets, Return to Kyoto</a></li>
+                <!-- <li><a href="index.html">Back to Home</a></li> -->
+            </ul>
+        </div>
+
+        <h2 id="Morning-1">Early Morning: Breakfast, Nara Park, Kofukuji</h2>
+
+        <p>
+            It was another early start today, with us catching a train before 7am to get to Nara. We found a strange bakery/cafe 
+            around the corner and about a block south from the station, Chateau dor Nara, where we had some strong blended coffee and 
+            <span class="modal-trigger" data-image="Japan Blog/Photos/20250407_082242.jpg">bread-based things</span> for their breakfast set. Then, it was time to start our Nara loop. By 8:45, sure enough, we were posing with deer.
+        </p>
+
+        <p>
+            Now, there was a variety of attitudes among this population of deer. The first group we encountered were those who were 
+            hanging out in the densely trafficked area where there are stalls selling the deer crackers. The deer there know you have 
+            crackers, and they want some... and you'll comply if you know what's best for you. When they saw the treat in my hand, I 
+            suddenly had more than five surrounding me, headbutting me, biting my butt… these guys were not patient. I thought they 
+            were supposed to be polite!!
+        </p>
+
+        <img src="Japan Blog/Photos/IMG_2984.jpeg" alt="Nara Deer Selfie" /><p></p>
+
+        <p>
+            After I gave out a cracker or two, I handed them off to Jacob for a turn and he pretty much immediately gave out the entire 
+            rest of the pack. Fine, at least now they can be some other tourist's problem. We've got an historic capital to explore.
+        </p>
+
+        <p>
+            This small urban park where the deer and cracker vendors prowl was right outside the great <span class="modal-trigger" data-image="https://www.japan-guide.com/g18/4101_03.jpg"><blu>Kofuku-ji Temple</blu></span>, which is usually the site of the magnificent <span class="modal-trigger" data-image="https://airial.travel/_next/image?url=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fd%2Fdc%2FThe_5_Storey_Pagoda_at_Kofukuji_Temple.jpg&w=3840&q=70"><blu>six-story pagoda</blu></span>… but that guy is completely blocked off and covered, as there is an ongoing multi-year restoration project. That's no big problem; there are still two great halls, multiple smaller buildings on the periphery, and a small museum of "national treasures" to see. Photography wasn't allowed inside any of them, but they are large and impressive and since we got there at opening time 9:00, we had so much space to ourselves!
+        </p>
+        
+            <img src="Japan Blog/Photos/IMG_2980.jpeg" alt="Kofuku-ji" />
+            <p><em>Goshuin shown on the previous page.</em></p>
+
+        <p>
+            I can hardly imagine how many people would be in this courtyard just shortly after we took our picture, once the tour buses all started to roll in. Despite the pagoda being walled off, this was one of my favorite locations of the trip. The vibes were great. The space was open. The museum was mostly statues of Buddha/Buddhist characters (I don't really understand how it works). But it was well laid out, quiet, cool.
+        </p>
+
+        <p>
+            While we are in this plaza, I wanted to mention two features of some shrines that I do not think have come up yet. First are the temizuya, or water purification basins. These are usually stone basins with a roof over them, and ladles for scooping water. Visitors use these to ritually cleanse their hands and mouth before entering the sacred space. The second are ema, which are small wooden plaques on which visitors write prayers or wishes, and leave them hanging at the shrine. They can commonly be found for sale at the shrines, usually with an artistic depiction of a figure important to the shrine.
+        </p>
+
+        <p>
+            I brought these two up together to explain this picture, which features both. Kofukuji features dragon/serpent sculptures and motifs throughout, with a famous example being the bronze dragon fountain providing the moving water for the temizuya. Around it, ema are hanging, many also featuring a snake design.
+        </p>
+
+            <img src="Japan Blog/Photos/Japan - 207 of 485.jpeg" alt="Kofuku-ji Temizuya and Ema" />
+
+        <h2 id="Morning-2">Morning: Yoshikien Garden, Todaiji</h2>
+
+        <p>
+            The path to <b>Todai-Ji</b>, what I think of as the "main" landmark of Nara, took us through <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_5791.jpeg">Yoshikien Garden</span>. This is the smaller, less known neighbor of <span class="modal-trigger" data-image="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/08/6f/f2/d1/lotus-flowers-in-the.jpg?w=900&h=500&s=1"><blu>Isuien Garden</blu></span>. It is more intimate; rather than featuring landscape vistas, it has <span class="modal-trigger" data-image="Japan Blog/Photos/20250407_102410.jpeg">moss</span>, ponds, and a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_2988.jpeg">traditional tea house</span>. It is also our gateway to… well, a much larger and more literal gateway.
+        </p>
+
+        <p>
+            The <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_2990.jpeg">Todai-Ji Namdaimon</span> (Grand South Gate) is a huge wooden temple gate with a two-tiered roof and a huge guardian statue on either side as you walk through. It leads us toward the temple proper, and is not free of the Nara deer.
+        </p>
+            <img src="Japan Blog/Photos/IMG_2995.jpeg" alt="Todaiji Namdaimon with Deer">
+
+        <p>
+            At last, we arrived at the home of the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3010.jpeg">Daibutsu</span>, the massive bronze statue of Buddha. The courtyard within the outer gate is well-landscaped and we are there at a brilliant time to see the cherry blossoms.
+        </p>
+
+            <img src="Japan Blog/Photos/IMG_5816.jpeg" alt="Todaiji Courtyard Sakura">
+
+        <p>
+            It's hard to capture in a single photo how huge the Buddha is, while also making it look nice from a photography perspective. At least, it was for me, at this time and with such crowded conditions. The picture attached to the word "Daibutsu" above is the picture I took, but for a sense of scale, try looking at <span class="modal-trigger" data-image="https://temporarilylost.com/wp-content/uploads/2012/09/todaiji-temple-26-daibutsu.jpg?w=1000"><blu>this photo</blu></span>.
+        </p>
+        <p>
+            There’s a pillar towards the back of the temple with a hole through it the size of the Buddha’s nostril, and people can squeeze through it. It is said that if you can make it through, you will be granted enlightenment in your next life. I forgot about it while we were inside, though, and I didn't notice it at the time. That's okay, I'll have to look for magic nostrils elsewhere.
+        </p>
+        <p>
+            There were also some <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3018.jpeg">temple guardians</span> who I thought were neat, and a <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_3020.jpeg">scale model</span> of what this whole pavilion would have looked like in its prime.
+        </p>
+        
+        <p>
+            My enjoyment here was hindered slightly by the size of the crowds, but it really is a cool place. Once we got back outside 
+            and re-applied some sunscreen (away from the nosy deer, who wanted to stick their faces in Jacob’s open backpack), we 
+            headed out. We passed through a much nicer park than the municipal rectangle where we started the day - maybe this is the 
+            actual Nara Park? - it was a big field with some picnic benches and a full perimeter of Sakura trees in bloom. It was also 
+            where we got our first nice view of a gust of wind carrying lots of the petals through the air. It seemed to be mostly 
+            locals here and it seemed like a great spot to chill. There was a deer not in the market for crackers, it was content just 
+            chewing on some cherry blossom petals in the grass.
+        </p>
+        <img src = "Japan Blog/Photos/Japan - 241 of 485.jpeg" alt="Nara Deer Eating Sakura" >
+
+        <h2 id="Morning-3">Noon-ish: Kasugataisha</h2>
+
+        <p>
+            Next was the <span class="modal-trigger" data-image="Japan Blog/Photos/IMG_5901.jpeg">Kasuga Taisha Shrine</span>, which stands out because of its especially bright vermillion columns. Honestly, given that it was first established in 768 C.E., it was a little too polished for me. There are a few times I felt this way, where things looked too new - in their defense, most of these have burned down and been rebuilt a few times in the past thousand years or so - but I found the surrounding paths and area to be more enticing than the main shrine area itself. It was a nice walk on a paved path through a forest and the path was lined with all of these stone lanterns, with the occasional small shrine along the way.
+        </p>
+
+        <img src = "Japan Blog/Photos/todaiji kasuga.jpeg" alt="Goshuin Nara" >
+        <p><em>Goshuin: Todai-Ji (right), Kasugataisha (left)</em></p>
+
+        <p>
+            And yes, more <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 249 of 485.jpeg">deer</span> roamed here as well. I liked these guys way more. The deer at the beginning were standing where the crackers are bought and will stop at nothing to get them. These guys were on a quieter path, nodding to passers-by in the hope that they would endear the human and earn a snack. Of course, tourists who didn't know how to handle the transaction were still liable to be mobbed, especially by the <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 222 of 485.jpeg">males</span>.
+        </p>
+
+            <img src="Japan Blog/Photos/Japan - 250 of 485.jpeg" alt="Kasugataisha Deer" />
+            <img src="Japan Blog/Photos/TYDXE1292.jpeg" alt="Kasugataisha Pathway" />
+
+        <h2 id="Afternoon-1">Afternoon: Lunch, Gangoji, Sarusawa-ike Pond</h2>
+
+        <p>
+            After making it to the end of the park, and a brief interaction with an older Israeli couple asking for directions to Todai-Ji (which was a ways off, this is just notable because I found it interesting how much Hebrew I was observing in Japan. They were like, 'how did you know?!' Uhh, your accent and the fact that your phone is in Hebrew), we headed back in the direction of the station (parallel to our first stretch, but a few blocks south) and had our heads on a swivel for a lunch spot. That's how we came to find <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 264 of 485.jpeg">Hideout</span>, a small local spot that was easy to miss. They only had on-the-floor seating (tatami mats), and I believe we were the only tourists present. This was my first meal on a pillow on the floor but I think I kinda nailed it. Food was good, too. Jacob had butter chicken, and noted that the waitress was 'very patient' with his 'broken' Japanese.
+        </p>
+
+            <img src="Japan Blog/Photos/IMG_3033.jpeg" alt="Lunch at Hideout" /><p></p>
+
+        <p>
+            Next was <span class="modal-trigger" data-image="https://narashikanko.or.jp/lsc/upfile/spot/0001/0027/10027_1_l.jpg"><blu>Gango-Ji</blu></span>. We had a sort of weird interaction with the man at the entrance here, and honestly, it didn't look incredibly unique as a temple, having now been to so many. We didn't go inside, but we still got our goshuin for making the pilgrimmage!
+        </p>
+        <img src = "Japan Blog/Photos/gangoji.jpeg" alt="Goshuin from Gangoji" >
+        <p><em>
+            Goshuin: Gango-Ji.
+        </em></p>
+        <p>
+            I guess he gave us two designs? I assume that something was lost in translation. The one employee did not speak any English, and the other tourists who came by spoke no Japanese. It wasn't our clearest communication.
+        </p>
+            
+            <p>
+                At this point, we had just about completed our Nara loop. We headed north to <b>Sarasuwa-Ike</b>, a pond from which you can see one of the smaller corner buildings of Kofuku-ji (visited this morning). Honestly, I expected a little more majesty and a little less Starbucks, but at least there were two <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 270 of 485.jpeg">turtles</span> posing for me.
+            </p>
+             <img src="Japan Blog/Photos/Japan - 269 of 485.jpeg" alt="Sarusawa-ike Pond" />
+
+        <h2 id="Evening">Evening: Shopping Streets, Return to Kyoto</h2>
+
+        <p>
+            After that, it was just the shopping streets as we meandered back towards the trains. There was some fun merchandise 
+            available. We were especially fond of all the Peanuts collabs that we found across Japan, and <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 272 of 485.jpeg">Snoopy in Nara</span> was no exception. A destination specifically on my map was the <span class="modal-trigger" data-image="https://kodawari-times.net/wp-content/uploads/2023/03/nakagawamasashichi02.jpg"><blu>Nakagawa Masashichi Shoten</blu></span> store, which was primarily a cafe on the first floor and a goods shop on the second floor. It had been mentioned at some point because of its unique and classy Ghibli collabs. I found a ceramic figurine that I loved here: a monkey and a fox on the back of a deer. The mascot animals of each of the three days we had so far! Technically, it is an <span class="modal-trigger" data-image="Japan Blog/Photos/generic omikuji.jpg"><blu>Omikuji</blu></span> (fortune slip); there is a hole on the bottom like a piggy bank, and there is a paper fortune inside. Honestly, I should've gotten multiple of them. My mind was blown by how perfect this was. Love it!</p>
+
+
+        <p>
+            Naturally, we found <b>Nakatanidou</b>, famous for their <span class="modal-trigger" data-image="Japan Blog/Photos/Japan - 274 of 485.jpeg">matcha mochi</span>. They had finished <span class="modal-trigger" data-image="https://thetravellist.net/food/japan/images/large/nakatanidou-2-ife.jpg"><blu>pounding the mochi with their sledgehammers</blu></span> for the day but they were still selling the fresh warm snacks, and their line moves really quickly and was less bloated by onlookers now that the show was over. Yum. I like mochi.
+        </p>
+
+        <p>
+            We slowly wound our way to the other Nara station to take the train back to Kyoto for dinner. We ate somewhere at or around Kyoto Station, and I got a set dinner with a big meatball thing, some steak, and what looks like long shrimp tempura or something.
+        </p>
+        <img src="Japan Blog/Photos/IMG_3045.jpeg" alt="Dinner in Kyoto" />
+        <p></p>
+        <p>
+            For dessert, we grabbed some random <span class="modal-trigger" data-image="Japan Blog/Photos/20250407_202757.jpg">matcha cookies</span>. I got home exhausted. A day well-spent!
+        </p>
+        
+        <footer>
+            <!-- <p>✈️ End of Joe's Japan Diaries ✈️</p>
+            <p>April 3-13, 2024</p> -->
+        <div class="navigation-buttons">   
+            <a href="day-2.html"><button>Previous Day</button></a>
+            <a href="index.html"><button>Home</button></a>
+            <a href="day-4.html"><button>Next Day</button></a>
+        </div>
+        </footer>
+    </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 500) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+    <script>
+
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>
