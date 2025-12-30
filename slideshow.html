@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+        }
+
+        /* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+
+        /* End of me trying to make navigation buttons */
+
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "💺";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🌏 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🏯 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "🌳 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🎋 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #back-to-home {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-home:hover {
+            background: #d63031;
+        }
+
+        #back-to-home.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+    <style>
+    /* Hero banner styles */
+    .hero {
+        position: relative;
+        width: 100%;
+        height: 420px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #000;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+    }
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 1s ease;
+        display: block;
+    }
+    .hero-slide.active { opacity: 1; }
+    .hero-caption {
+        position: absolute;
+        left: 16px;
+        bottom: 12px;
+        color: #fff;
+        background: rgba(0,0,0,0.35);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        max-width: calc(100% - 40px);
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    /* gallery links (jump-to sections) */
+    .gallery-links {
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        margin:10px 0 14px 0;
+        justify-content: center; /* center the jump-buttons */
+    }
+    .gallery-links a {
+        background: #fff;
+        border: 1px solid #ffd6d6;
+        color: #d63031;
+        padding: 8px 12px;
+        border-radius: 20px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .gallery-links a:hover { background: #ffefef; }
+    html { scroll-behavior: smooth; }
+    /* hide visible filename captions from UI while keeping alt/text available for accessibility */
+    .hero-caption,
+    #image-modal-caption { display: none !important; }
+
+    /* Gallery styles */
+    .gallery { margin-top: 30px; }
+    .gallery-section { margin-top: 22px; }
+    .gallery-section h3 { margin-bottom: 8px; color: #d63031; }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .gallery-item {
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        height: 160px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.25s ease;
+    }
+
+    .gallery-item:focus { outline: 3px solid rgba(255,107,107,0.25); }
+    .gallery-item:hover img { transform: scale(1.04); }
+
+    .gallery-item .caption {
+        font-size: 0.85em;
+        padding: 6px 8px;
+        background: rgba(255,255,255,0.9);
+        color: #333;
+        display: none; /* captions appear in modal */
+    }
+
+    /* modal prev/next buttons */
+    #image-modal .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.45);
+        color: #fff;
+        border: none;
+        width: 64px;
+        height: 64px;
+        font-size: 26px; /* larger arrow symbol for readability */
+        border-radius: 50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    #image-modal .modal-prev { left: 12px; }
+    #image-modal .modal-next { right: 12px; }
+    /* nudge larger nav buttons slightly inward so they sit comfortably over the image */
+    #image-modal .modal-prev { left: 18px; }
+    #image-modal .modal-next { right: 18px; }
+    #image-modal .modal-nav:hover { background: rgba(0,0,0,0.6); }
+    @media (max-width: 480px) {
+        .gallery-item { height: 120px; }
+        #image-modal .modal-nav { width: 48px; height: 48px; font-size: 20px; }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+            <h2></h2>
+            
+            <!-- Photo gallery: edit the `selectedImages` array (below) to pick images from
+             the `Japan Blog/Photos/` folder to display here. -->
+        <section aria-label="Photo gallery" class="gallery">
+            
+            <!-- Rotating banner / hero: updates automatically every 4s -->
+            <div id="hero" class="hero" aria-live="polite"></div>
+
+            <h2>Photo Gallery</h2>
+
+            <!-- quick links to each gallery section -->
+            <nav id="gallery-links" class="gallery-links" aria-label="Jump to gallery sections"></nav>
+
+            <p class="subtitle">Click a thumbnail to enlarge; use ← and → to navigate.</p>
+
+            <!-- Galleries container: the script below creates a section/grid per category -->
+            <div id="galleries"></div>
+        </section>
+        </header><h1></h1>
+
+
+        <!-- VIDEO EMBEDDED HERE -->
+        <!-- Video gallery section: header + embedded player so the "Video" jump link scrolls here -->
+        <section class="gallery-section" id="gallery-video">
+            <h3 style="text-align: center;">Video</h3>
+            <div style="display:flex;justify-content:center;padding:12px 0;">
+                <iframe src="https://drive.google.com/file/d/1-yIXslvxLX4BhgjbZdWMoNsMoJboChva/preview" width="760" height="480" style="display: block; margin: 0 auto; border: none;"></iframe>
+            </div>
+        </section>
+
+        <h2></h2>
+    
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="index.html#day-minus-1">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="day-1.html">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</a></li>
+                <li><a href="day-2.html">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="day-3.html">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="day-4.html">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="day-5.html">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="day-6.html">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="day-7.html">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="day-8.html">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="day-9.html">Sunday, April 13th: Tokyo, New York ✈️</a></li>
+            </ul>
+        </div>
+
+
+        <footer>
+            <!-- <p>✈️ End of Joe's Japan Diaries ✈️</p>
+            <p>April 3-13, 2024</p> -->
+        </footer>
+
+
+    </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+    <!-- Back To Home Button if I do it right -->
+     <button id="back-to-home" title="Back to home">🏠 Home</button>
+     <script>
+        const backToHomeButton = document.getElementById('back-to-home');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset < 200) {
+                backToHomeButton.classList.add('show');
+            } else {
+                backToHomeButton.classList.remove('show');
+            }
+        });
+
+        backToHomeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+     </script>
+
+        <script>
+        // --- Gallery + Hero configuration: edit the `categories` object and `highlightImages` ---
+        (function () {
+            const photoDir = 'Japan Blog/Photos/';
+
+            // categories: add/remove or edit these arrays to control each section's images
+            const categories = {
+                'Kyoto': [
+                    // Fushimi Inari
+                    'IMG_2778.jpeg',
+                    'IMG_2784.jpeg',
+                    'IMG_2812.jpeg',
+                    'fush1.JPeG',
+                    'fush2.JPeG',
+                    'fush3.JPeG',
+                    'IMG_5397.jpeg',
+                    'IMG_5376.jpeg',
+                    // Rest of Eastern Kyoto day 1
+                    'IMG_2816.jpeg',
+                    'IMG_2817.jpeg',
+                    'IMG_5417.jpeg',
+                    'IMG_2824.jpeg',
+                    'IMG_2832.jpeg',
+                    'IMG_5484.jpeg',
+                    'IMG_2834.jpeg',
+                    'IMG_2872.jpeg',
+                    'IMG_5529.jpeg',
+                    'IMG_5540.jpeg',
+                    'IMG_5546.jpeg',
+                    'IMG_5549.jpeg',
+                    'Japan - 94 of 485.jpeg',
+                    'IMG_2860.jpeg',
+                    'IMG_2848.jpeg',
+                    // Western Kyoto, day 2
+                    'IMG_5551.jpeg',
+                    'Japan - 124 of 485.jpeg',
+                    'Japan - 129 of 485.jpeg',
+                    'japanpic - 1.jpeg',
+                    'japanpic - 2.jpeg',
+                    'IMG_5681.jpeg',
+                    'IMG_2914.jpeg',
+                    'Japan15.jpeg',
+                    'IMG_5723.jpeg',
+                    'Japan - 152 of 485.jpeg',
+                    'Japan - 159 of 485.jpeg',
+                    'IMG_5739.jpeg',
+                    'IMG_2920.jpeg',
+                    'IMG_2928.jpeg',
+                    'Japan - 181 of 485.jpeg',
+                    'Japan - 184 of 485.jpeg',
+                    'IMG_2947.jpeg',
+                    'IMG_2957.jpeg',
+                    'IMG_2958.jpeg',
+                    'IMG_2959.jpeg'
+                ],
+                'Nara': [
+                    'IMG_2984.jpeg',
+                    'IMG_2980.jpeg',
+                    'Japan - 207 of 485.jpeg',
+                    'IMG_5791.jpeg',
+                    '20250407_102410.jpeg',
+                    'IMG_2995.jpeg',
+                    'IMG_5816.jpeg',
+                    'IMG_3010.jpeg','IMG_3018.jpeg',
+                    'IMG_5901.jpeg','IMG_5909.jpeg',
+                    'Japan - 241 of 485.jpeg',
+                    'Japan - 249 of 485.jpeg',
+                    'Japan - 250 of 485.jpeg',
+                    'TYDXE1292.jpeg',
+                    'IMG_3033.jpeg', 
+                    'Japan - 269 of 485.jpeg',
+                    'Japan - 270 of 485.jpeg',
+                    'IMG_3045.jpeg'
+                ],
+                'Hakone': [
+                    // Day 1
+                    'IMG_3056.jpeg',
+                    'fujitrain.jpeg',
+                    'fujitrain2.jpeg',
+                    'IMG_6028.jpeg',
+                    'Japan - 282 of 485.jpeg',
+                    'IMG_3063.jpeg',
+                    'IMG_3076.jpeg',
+                    'IMG_3081.jpeg',
+                    'cable fuji.jpeg',
+                    'Japan - 297 of 485.jpeg',
+                    'Japan - 299 of 485.jpeg',
+                    'Japan - 302 of 485.jpeg',
+                    'IMG_3088.jpeg',
+                    'IMG_3099.jpeg',
+                    'IMG_3100.jpeg',
+                    'IMG_3092.jpeg',
+                    'IMG_3096.jpeg',
+                    'IMG_3102.jpeg',
+                    'IMG_3091.jpeg',
+                    'IMG_3104.jpeg',
+                    'Japan - 318 of 485.jpeg',
+                    'IMG_3169.jpeg',
+                    'Japan - 320 of 485.jpeg',
+                    'Japan - 325 of 485.jpeg',
+                    // Day 2
+                    'IMG_6049.jpeg',
+                    'Japan - 326 of 485.jpeg',
+                    '20250409_084858.jpeg',
+                    '20250409_090553.jpg',
+                    'IMG_6100.jpeg',
+                    'Japan - 350 of 485.jpeg',// Mt Fuji
+                    'Japan - 351 of 485.jpeg',
+                    'Japan - 352 of 485.jpeg',
+                    'Japan - 353 of 485.jpeg',
+                    'IMG_3255.jpeg'
+                ],
+                'Tokyo': [
+                    // Day 1
+                    'Japan - 368 of 485.jpeg',
+                    '20250409_155617.jpeg',// Sensō-ji, Asakusa
+                    'IMG_3258.jpeg',
+                    'Asakusa_Shrine.jpg',
+                    'Japan - 378 of 485.jpeg',
+                    'Japan - 379 of 485.jpeg',
+                    'IMG_3282.jpeg',
+                    '20250409_170353.jpeg',
+                    'Japan - 384 of 485.jpeg',
+                    'Japan - 389 of 485.jpeg',
+                    'IMG_3285.jpeg',
+                    'IMG_3287.jpeg',
+                    'IMG_3288.jpeg',
+                    '20250409_185305.jpeg',
+                    '20250409_205758.jpg',
+                    '20250409_220908.jpeg',
+                    'IMG_3328.jpeg',
+                    'IMG_3341.jpeg',
+                    // Day 2
+                    // Ueno Park
+                    'IMG_6237.jpeg',
+                    'IMG_6321.jpeg',
+                    'IMG_6306.jpeg',
+                    'Japan - 410 of 485.jpeg',
+                    'IMG_3398.jpeg',
+                    // Night
+                    'Japan - 429 of 485.jpeg',
+                    '20250410_181655.jpg',
+                    '20250410_190749.jpg',
+                    // Yoyogi Park, Harajuku
+                    'train window.JPG',
+                    'yoyogi1.JPG',
+                    '20250411_095905.jpeg',
+                    '20250411_100107.jpeg',
+                    'IMG_3420.jpeg',
+                    '20250411_101127.jpeg',
+                    'Japan - 436 of 485.jpeg',
+                    'Japan - 439 of 485.jpeg',
+                    // Shibuya
+                    'Japan - 441 of 485.jpeg',
+                    'Japan - 444 of 485.jpeg',
+                    '20250411_120447.jpg',
+                    '20250411_121512.jpg',
+                    '20250411_130740.jpeg',
+                    'brendan.jpeg',
+                    'IMG_3430.jpeg',
+                    '20250411_205256.jpg',
+                    'IMG_3450.jpeg',
+                    //Last Full Day
+                    'subwayrobot.JPG',
+                    'Japan - 459 of 485.jpeg',
+                    'IMG_3465.jpeg',
+                    'IMG_3469.jpeg',
+                    'IMG_3478.jpeg',
+                    //Afternoon
+                    'IMG_3495.jpeg',
+                    'IMG_3499.jpeg',
+                    'Japan - 474 of 485.jpeg',
+                    //Night
+                    'IMG_3504.jpeg',
+                    'Japan - 476 of 485.jpeg',
+                    '20250412_200735.jpg',
+                    'IMG_3511.jpeg',
+                    '20250412_202219.jpeg',
+                    'Japan - 479 of 485.jpeg',
+                    '20250412_212148.jpeg'
+
+                ],
+                'Goshuin': [
+                    'goshuincho.jpeg',
+                    'Fushimi Inari Taisha.jpeg',
+                    'kiyumizodera.jpeg',
+                    'sanju and kodaiji.jpeg',
+                    'tenryuji.jpeg',
+                    'adashino kofukuji.jpeg',
+                    'todaiji kasuga.jpeg',
+                    'gangoji.jpeg',
+                    'hakone peace.jpeg',
+                    'asakusa shrine.jpeg',
+                    'Sensoji Ishibashiinari.jpeg',
+                    'ueno2.jpeg',
+                    'hanazono.jpeg',
+                    'meiji.jpeg',
+                    'zozoji hoshuin.jpeg',
+                    'last goshuin.jpeg'
+                ],
+                'Stamps & Souvenirs': [
+                    'hakone geo.jpeg',
+                    'NGE.jpeg',
+                    'IMG_6993.jpeg',
+                    'hachi.jpeg',
+                    'IMG_6978.jpeg',
+                    'IMG_6979.jpeg',
+                    'beef.jpeg',
+                    'zoo booth.jpeg',
+                    'zoo stamps.jpeg',
+                    'zoo rag.jpeg',
+                    'pandapouch.JPG',
+                    'books stamp.jpeg',
+                    'gacha food.jpeg',
+                    'IMG_7026.jpeg',
+                    'inari ema.jpeg',
+                    'IMG_6995.jpeg',
+                    'sukajac back.jpeg',
+                    'omikuji.jpeg',
+                    'ghibligets.jpeg',
+                    'jojohaul.jpeg'
+                ]
+            };
+
+            // highlight images: derive (and randomize) from all images referenced in `categories`
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function slugify(text) {
+                return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            }
+
+            /* --- BANNER PHOTOS START ---
+               The hero banner on this page will use the explicit `bannerPhotos` list below.
+               Paste filenames from `Japan Blog/Photos/` into the array to choose the order.
+               Example: ['Japan - 485 of 485.jpeg', 'Asakusa_Shrine.jpg']
+               To randomize the banner, set RANDOMIZE_BANNER = true.
+            */
+            const bannerPhotos = [
+                // Paste filenames here, e.g.:
+                // 'Japan - 485 of 485.jpeg',
+                // 'Asakusa_Shrine.jpg',
+                //Kyoto
+                'IMG_2812.jpeg','fush2.JPeG','IMG_5376.jpeg','IMG_2816.jpeg','IMG_5417.jpeg','IMG_2824.jpeg','IMG_2832.jpeg','IMG_5484.jpeg','IMG_2834.jpeg','IMG_5549.jpeg','Japan - 94 of 485.jpeg','IMG_2860.jpeg','IMG_2848.jpeg','IMG_5551.jpeg',
+                'japanpic - 1.jpeg','IMG_5681.jpeg','Japan15.jpeg','IMG_5723.jpeg','Japan - 152 of 485.jpeg','Japan - 159 of 485.jpeg','IMG_5739.jpeg','IMG_2920.jpeg','IMG_2928.jpeg','Japan - 181 of 485.jpeg','Japan - 184 of 485.jpeg','IMG_2947.jpeg','IMG_2959.jpeg',
+                //Nara
+                'IMG_2980.jpeg','Japan - 207 of 485.jpeg','IMG_5791.jpeg','20250407_102410.jpeg','IMG_2995.jpeg','IMG_5816.jpeg','IMG_5901.jpeg','IMG_5909.jpeg','Japan - 241 of 485.jpeg','TYDXE1292.jpeg','IMG_3033.jpeg','Japan - 270 of 485.jpeg',
+                //Hakone
+                'fujitrain.jpeg','fujitrain2.jpeg','IMG_6028.jpeg','Japan - 282 of 485.jpeg','IMG_3076.jpeg','IMG_3081.jpeg','cable fuji.jpeg','IMG_3088.jpeg','IMG_3091.jpeg','IMG_3104.jpeg','Japan - 325 of 485.jpeg','IMG_6049.jpeg','20250409_090553.jpg','IMG_6100.jpeg','Japan - 351 of 485.jpeg','Japan - 352 of 485.jpeg','Japan - 353 of 485.jpeg',
+                //Tokyo
+                '20250409_155617.jpeg','Asakusa_Shrine.jpg','Japan - 378 of 485.jpeg','Japan - 379 of 485.jpeg','20250409_170353.jpeg','Japan - 384 of 485.jpeg','Japan - 389 of 485.jpeg','IMG_3285.jpeg','20250409_185305.jpeg','20250409_220908.jpeg','IMG_3328.jpeg','IMG_3341.jpeg','IMG_6237.jpeg','IMG_6321.jpeg','IMG_6306.jpeg','Japan - 410 of 485.jpeg','Japan - 429 of 485.jpeg','20250410_181655.jpg','20250410_190749.jpg','train window.JPG','yoyogi1.JPG','20250411_100107.jpeg','20250411_101127.jpeg','Japan - 436 of 485.jpeg','Japan - 439 of 485.jpeg','Japan - 441 of 485.jpeg','20250411_120447.jpg','20250411_121512.jpg','20250411_130740.jpeg','brendan.jpeg','IMG_3430.jpeg','20250411_205256.jpg','IMG_3450.jpeg','subwayrobot.JPG','IMG_3465.jpeg','IMG_3469.jpeg','IMG_3478.jpeg','IMG_3499.jpeg','IMG_3504.jpeg','Japan - 476 of 485.jpeg','20250412_202219.jpeg','Japan - 479 of 485.jpeg','20250412_212148.jpeg'
+            ];
+            const RANDOMIZE_BANNER = true;
+            /* --- BANNER PHOTOS END --- */
+
+            function niceCaption(filename) {
+                return filename.replace(/\.[^.]+$/, '')
+                               .replace(/[_-]+/g, ' ')
+                               .replace(/\s+/g, ' ')
+                               .trim();
+            }
+
+            function renderHero() {
+                const hero = document.getElementById('hero');
+                if (!hero) return;
+                hero.innerHTML = '';
+                // const excludes = getExcludedSet();
+                // use bannerPhotos (user-supplied) and apply excludes
+                let images = (bannerPhotos || []).filter(name => name);
+                if (RANDOMIZE_BANNER) images = shuffle(images.slice());
+                if (!images.length) {
+                    hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No banner images configured</div>';
+                    return;
+                }
+
+                const slides = [];
+                images.forEach((name, i) => {
+                    const img = document.createElement('img');
+                    img.className = 'hero-slide';
+                    img.src = photoDir + encodeURI(name);
+                    img.decoding = 'async';
+                    img.loading = 'eager';
+                    img.alt = niceCaption(name);
+                    if (i === 0) img.classList.add('active');
+                    hero.appendChild(img);
+                    slides.push(img);
+                });
+                const caption = document.createElement('div');
+                caption.className = 'hero-caption';
+                caption.textContent = niceCaption(images[0] || '');
+                hero.appendChild(caption);
+
+                                let idx = 0;
+                                let intervalId = null;
+                                let lastRun = Date.now();
+
+                                function show(i) {
+                                    if (!slides.length) return;
+                                    slides.forEach((s, j) => s.classList.toggle('active', j === i));
+                                    // update caption from the images array
+                                    caption.textContent = niceCaption(images[i] || '');
+                                    idx = i;
+                                    lastRun = Date.now();
+                                }
+
+                                function next() { if (slides.length > 1) show((idx + 1) % slides.length); }
+
+                                function start() {
+                                        if (intervalId || slides.length <= 1) return;
+                                        intervalId = setInterval(next, 4000); // rotate every 4s now
+                                        if (Date.now() - lastRun > 5000) next();
+                                }
+
+                                function stop() {
+                                        if (!intervalId) return;
+                                        clearInterval(intervalId);
+                                        intervalId = null;
+                                }
+
+                                // pause on hover/touch
+                                hero.addEventListener('mouseenter', stop);
+                                hero.addEventListener('mouseleave', start);
+                                hero.addEventListener('touchstart', stop);
+                                hero.addEventListener('touchend', start);
+
+                                // resume when tab becomes visible
+                                document.addEventListener('visibilitychange', function () {
+                                    if (document.visibilityState === 'visible') start(); else stop();
+                                });
+
+                                // watchdog: if rotation stops unexpectedly, restart it
+                                const watchdog = setInterval(function () {
+                                    if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
+                                        start();
+                                    }
+                                }, 5000);
+
+                                // start rotating
+                                if (slides.length > 1) start();
+            }
+
+            function renderGallery() {
+                const container = document.getElementById('galleries');
+                if (!container) return;
+                container.innerHTML = '';
+                // render quick-nav links
+                const nav = document.getElementById('gallery-links');
+                if (nav) nav.innerHTML = '';
+                Object.keys(categories).forEach(cat => {
+                    const section = document.createElement('section');
+                    section.className = 'gallery-section';
+                    const id = 'gallery-' + slugify(cat);
+                    section.id = id;
+                    const h3 = document.createElement('h3');
+                    h3.textContent = cat;
+                    section.appendChild(h3);
+
+                    // add a quick link for this section
+                    if (nav) {
+                        const a = document.createElement('a');
+                        a.href = '#' + id;
+                        a.textContent = cat;
+                        a.setAttribute('aria-controls', id);
+                        nav.appendChild(a);
+                    }
+
+                    const grid = document.createElement('div');
+                    grid.className = 'gallery-grid';
+                    grid.setAttribute('role','list');
+
+                    (categories[cat] || []).forEach(name => {
+                        const url = photoDir + encodeURI(name);
+                        const fig = document.createElement('figure');
+                        fig.setAttribute('role','listitem');
+                        fig.className = 'gallery-item modal-trigger';
+                        fig.setAttribute('tabindex','0');
+                        fig.setAttribute('data-image', url);
+                        fig.setAttribute('data-alt', niceCaption(name));
+
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.loading = 'lazy';
+                        img.alt = niceCaption(name);
+                        fig.appendChild(img);
+
+                        const cap = document.createElement('figcaption');
+                        cap.className = 'caption';
+                        cap.textContent = niceCaption(name);
+                        fig.appendChild(cap);
+
+                        grid.appendChild(fig);
+                    });
+
+                    // keyboard activation: Enter/Space opens the modal
+                    grid.addEventListener('keydown', function (e) {
+                        const item = e.target.closest && e.target.closest('.gallery-item');
+                        if (!item) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            item.click();
+                        }
+                    });
+
+                        section.appendChild(grid);
+                        container.appendChild(section);
+                });
+
+                    // add a static "Video" jump-link to match the Video section below
+                    if (nav) {
+                        const videoLink = document.createElement('a');
+                        videoLink.href = '#gallery-video';
+                        videoLink.textContent = 'Video';
+                        videoLink.setAttribute('aria-controls', 'gallery-video');
+                        nav.appendChild(videoLink);
+                    }
+            }
+
+            // render now (handle both cases where DOMContentLoaded may have already fired)
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function () { renderHero(); renderGallery(); });
+            } else {
+                renderHero(); renderGallery();
+            }
+
+        })();
+
+        (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+                overlay.innerHTML = '\
+                    <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+                        <button class="modal-close" aria-label="Close image">✕</button>\
+                        <button class="modal-nav modal-prev" aria-label="Previous image">‹</button>\
+                        <img id="image-modal-img" src="" alt="Preview image">\
+                        <button class="modal-nav modal-next" aria-label="Next image">›</button>\
+                        <div id="image-modal-caption" class="caption" aria-live="polite"></div>\
+                    </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+            const modalCaption = document.getElementById('image-modal-caption');
+      const closeBtn = modal.querySelector('.modal-close');
+            const prevBtn = modal.querySelector('.modal-prev');
+            const nextBtn = modal.querySelector('.modal-next');
+            let galleryOrder = [];
+            let currentIndex = -1;
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+                modalImg.src = url || '';
+                modalImg.alt = altText || '';
+                modalCaption.textContent = altText || '';
+                // create/update gallery order from current DOM triggers
+                galleryOrder = Array.from(document.querySelectorAll('.modal-trigger')).map(el => el.getAttribute('data-image'));
+                currentIndex = galleryOrder.indexOf(url);
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+
+            function showIndex(i) {
+                if (!galleryOrder.length) return;
+                if (i < 0) i = galleryOrder.length - 1;
+                if (i >= galleryOrder.length) i = 0;
+                const url = galleryOrder[i];
+                // find alt from a matching trigger
+                const trigger = Array.from(document.querySelectorAll('.modal-trigger')).find(el => el.getAttribute('data-image') === url);
+                const alt = trigger && trigger.getAttribute('data-alt') || '';
+                currentIndex = i;
+                openModal(url, alt);
+            }
+
+            function prevImage() { showIndex(currentIndex - 1); }
+            function nextImage() { showIndex(currentIndex + 1); }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+            // modal prev/next buttons
+            prevBtn && prevBtn.addEventListener('click', function (e) { e.stopPropagation(); prevImage(); });
+            nextBtn && nextBtn.addEventListener('click', function (e) { e.stopPropagation(); nextImage(); });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+                if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+                    closeModal();
+                }
+                // left/right keys navigate
+                if (overlay.classList.contains('active')) {
+                    if (e.key === 'ArrowLeft') { e.preventDefault(); prevImage(); }
+                    if (e.key === 'ArrowRight') { e.preventDefault(); nextImage(); }
+                }
+      });
+    })();
+    </script> 
+
+</body>
+</html>
