@@ -916,13 +916,19 @@
                     _link.rel = 'preload';
                     _link.as = 'image';
                     _link.href = photoDir + encodeURI(images[0]);
-                    try { document.head.appendChild(_link); } catch (e) {}
+                    try { _link.setAttribute('importance','high'); _link.crossOrigin = 'anonymous'; document.head.appendChild(_link); } catch (e) {}
                 }
                 if (!images.length) {
                     hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No banner images configured</div>';
                     return;
                 }
 
+                // use the first banner image as a background placeholder
+                if (images && images[0]) {
+                    try { hero.style.backgroundImage = 'url("' + photoDir + encodeURI(images[0]) + '")'; } catch (e) {}
+                    hero.style.backgroundSize = 'cover';
+                    hero.style.backgroundPosition = 'center';
+                }
                 const slides = [];
                 images.forEach((name, i) => {
                     const img = document.createElement('img');
@@ -933,6 +939,7 @@
                     if (i === 0) {
                         img.classList.add('active');
                         try { img.fetchPriority = 'high'; } catch (e) {}
+                        try { img.setAttribute('fetchpriority', 'high'); } catch (e) {}
                     }
                     img.alt = niceCaption(name);
                     hero.appendChild(img);
@@ -1060,15 +1067,16 @@
 
                     allNames.slice(0, limit).forEach(appendThumb);
 
+                    // prepare a 'See more' control but append it after the grid so it appears below thumbnails
+                    let moreBtn = null;
                     if (isMobile && allNames.length > limit) {
-                        const moreBtn = document.createElement('button');
-                        moreBtn.className = 'show-more';
-                        moreBtn.textContent = 'Show more';
+                        moreBtn = document.createElement('button');
+                        moreBtn.className = 'see-more';
+                        moreBtn.textContent = 'See more';
                         moreBtn.addEventListener('click', function () {
                             allNames.slice(limit).forEach(appendThumb);
-                            moreBtn.remove();
+                            if (moreBtn) moreBtn.remove();
                         });
-                        section.appendChild(moreBtn);
                     }
 
                     // keyboard activation: Enter/Space opens the modal
@@ -1082,6 +1090,7 @@
                     });
 
                         section.appendChild(grid);
+                        if (moreBtn) section.appendChild(moreBtn);
                         container.appendChild(section);
                 });
 

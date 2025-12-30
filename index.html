@@ -367,6 +367,8 @@
             border-radius: 8px;
             overflow: hidden;
             background: #000;
+            background-size: cover;
+            background-position: center;
             margin-bottom: 14px;
             box-shadow: 0 8px 22px rgba(0,0,0,0.12);
         }
@@ -565,13 +567,13 @@
                 return shuffle(uniq.slice());
             })();
 
-            // Preload first highlight image for faster first-paint (helps mobile)
+            // Preload first highlight image early for faster first-paint (helps mobile)
             if (highlightImages && highlightImages[0]) {
                 const _link = document.createElement('link');
                 _link.rel = 'preload';
                 _link.as = 'image';
                 _link.href = 'Japan Blog/Photos/' + encodeURI(highlightImages[0]);
-                try { document.head.appendChild(_link); } catch (e) { /* ignore */ }
+                try { _link.setAttribute('importance','high'); _link.crossOrigin = 'anonymous'; document.head.appendChild(_link); } catch (e) { /* ignore */ }
             }
 
                 // Toggle this to false to disable the visible filename in the hero banner
@@ -592,6 +594,12 @@
                 const hero = document.getElementById('hero');
                 if (!hero) return;
                 hero.innerHTML = '';
+                // show background placeholder using the first image to reduce perceived load
+                if (highlightImages && highlightImages[0]) {
+                    try { hero.style.backgroundImage = 'url("' + photoDir + encodeURI(highlightImages[0]) + '")'; } catch (e) {}
+                    hero.style.backgroundSize = 'cover';
+                    hero.style.backgroundPosition = 'center';
+                }
                 const slides = [];
                 highlightImages.forEach((name, i) => {
                     const img = document.createElement('img');
@@ -602,8 +610,9 @@
                     img.loading = (i === 0) ? 'eager' : 'lazy';
                     if (i === 0) {
                         img.classList.add('active');
-                        // hint for newer browsers
+                        // hint for newer browsers and set attribute for broader support
                         try { img.fetchPriority = 'high'; } catch (e) {}
+                        try { img.setAttribute('fetchpriority', 'high'); } catch (e) {}
                     }
                     img.alt = niceCaption(name);
                     hero.appendChild(img);
