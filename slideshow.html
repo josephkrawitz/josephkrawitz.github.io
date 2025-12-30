@@ -416,6 +416,9 @@
         opacity: 0;
         transition: opacity 1s ease;
         display: block;
+        will-change: opacity;
+        backface-visibility: hidden;
+        transform: translateZ(0);
     }
     .hero-slide.active { opacity: 1; }
     .hero-caption {
@@ -933,15 +936,18 @@
                 images.forEach((name, i) => {
                     const img = document.createElement('img');
                     img.className = 'hero-slide';
-                    img.src = photoDir + encodeURI(name);
                     img.decoding = 'async';
                     img.loading = (i === 0) ? 'eager' : 'lazy';
+                    img.alt = niceCaption(name);
                     if (i === 0) {
                         img.classList.add('active');
                         try { img.fetchPriority = 'high'; } catch (e) {}
                         try { img.setAttribute('fetchpriority', 'high'); } catch (e) {}
+                        img.addEventListener('load', function () {
+                            try { setTimeout(function () { hero.style.backgroundImage = 'none'; }, 60); } catch (e) {}
+                        }, { once: true });
                     }
-                    img.alt = niceCaption(name);
+                    img.src = photoDir + encodeURI(name);
                     hero.appendChild(img);
                     slides.push(img);
                 });

@@ -381,6 +381,9 @@
             opacity: 0;
             transition: opacity 1s ease;
             display: block;
+            will-change: opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
         }
         .hero-slide.active { opacity: 1; }
         .hero-caption { display: none !important; }
