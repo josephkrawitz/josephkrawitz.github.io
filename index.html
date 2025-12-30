@@ -401,8 +401,23 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* --- HERO CAPTION END --- */
-    </style>
+                /* --- HERO CAPTION END --- */
+                /* Mobile-specific spacing improvements */
+                @media (max-width: 768px) {
+                    .container { padding: 18px; }
+                    h1 { font-size: 1.9em; }
+                    h2 { font-size: 1.3em; }
+                    p { text-align: left; line-height: 1.6; margin-bottom: 14px; }
+                    .toc { padding: 12px; margin: 20px 0; }
+                    .toc h3 { font-size: 1.05em; margin-bottom: 10px; }
+                    .toc ul { padding-left: 0; }
+                    .toc li { margin: 8px 0; padding-left: 12px; display: flex; align-items: center; gap: 8px; }
+                    .toc a { font-size: 0.95em; display: block; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+                    .navigation-buttons { gap: 12px; margin: 20px 0; flex-wrap: wrap; }
+                    .navigation-buttons button { padding: 8px 12px; font-size: 15px; }
+                    #back-to-top { padding: 10px 14px; bottom: 20px; right: 20px; }
+                }
+        </style>
 </head>
 <body>
     <div class="container">
