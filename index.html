@@ -386,6 +386,14 @@
             transform: translateZ(0);
         }
         .hero-slide.active { opacity: 1; }
+        /* On mobile, prefer a single static image and avoid creating a slideshow */
+        .hero-static {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: inherit;
+        }
         .hero-caption { display: none !important; }
         /* --- HERO CAPTION START (index only): visible filename overlay ---
            To disable, set `SHOW_HERO_CAPTION` to false in the script below or
@@ -597,9 +605,37 @@
                 const hero = document.getElementById('hero');
                 if (!hero) return;
                 hero.innerHTML = '';
-                // background placeholder removed to avoid bleed during crossfades
-                // (initial preload still occurs via <link rel="preload"> earlier)
+
+                if (!highlightImages || !highlightImages.length) {
+                    hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No hero images configured</div>';
+                    return;
+                }
+
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+                // On mobile, only show a single static hero and avoid creating slides or intervals
+                if (isMobile) {
+                    const name = highlightImages[0];
+                    const img = document.createElement('img');
+                    img.className = 'hero-static';
+                    img.decoding = 'async';
+                    img.loading = 'eager';
+                    img.alt = niceCaption(name);
+                    img.src = photoDir + encodeURI(name);
+                    hero.appendChild(img);
+
+                    if (SHOW_HERO_CAPTION) {
+                        const caption = document.createElement('div');
+                        caption.className = 'hero-caption';
+                        caption.textContent = niceCaption(name || '');
+                        hero.appendChild(caption);
+                    }
+                    return;
+                }
+
+                // Desktop/tablet behavior: render slides and caption element used by show()
                 const slides = [];
+                let caption = null;
                 highlightImages.forEach((name, i) => {
                     const img = document.createElement('img');
                     img.className = 'hero-slide';
@@ -618,14 +654,19 @@
                     slides.push(img);
                 });
 
+                if (SHOW_HERO_CAPTION) {
+                    caption = document.createElement('div');
+                    caption.className = 'hero-caption';
+                    caption.textContent = niceCaption(highlightImages[0] || '');
+                    hero.appendChild(caption);
+                }
+
                 let idx = 0;
                 let intervalId = null;
                 let lastRun = Date.now();
 
                 // --- SLIDE DURATION START ---
-                // Change this value (milliseconds) to make each slide stay longer/shorter
-                // (e.g., 4000 = 4 seconds)
-                const SLIDE_DURATION_MS = 5000;
+                const SLIDE_DURATION_MS = 6000;
                 // --- SLIDE DURATION END ---
 
                 function show(i) {
@@ -633,7 +674,7 @@
                         if (!slides.length) return;
                         slides.forEach((s, j) => s.classList.toggle('active', j === i));
                         // --- HERO CAPTION START (update) ---
-                        if (typeof caption !== 'undefined' && caption && SHOW_HERO_CAPTION) caption.textContent = niceCaption(highlightImages[i] || '');
+                        if (caption && SHOW_HERO_CAPTION) caption.textContent = niceCaption(highlightImages[i] || '');
                         // --- HERO CAPTION END ---
                         idx = i;
                         lastRun = Date.now();
@@ -647,7 +688,6 @@
                 function start() {
                     if (intervalId || slides.length <= 1) return;
                     intervalId = setInterval(() => { try { next(); } catch (e) { console.error('Hero interval error:', e); } }, SLIDE_DURATION_MS);
-                    // run once immediately if not started recently
                     if (Date.now() - lastRun > SLIDE_DURATION_MS + 1000) next();
                     console.debug('hero: started, slides=', slides.length, 'duration=', SLIDE_DURATION_MS);
                 }
@@ -664,25 +704,20 @@
                 hero.addEventListener('touchstart', stop);
                 hero.addEventListener('touchend', start);
 
-                // Ensure rotation resumes when tab becomes visible again
                 document.addEventListener('visibilitychange', function () {
                     if (document.visibilityState === 'visible') {
                         start();
                     } else {
-                        // allow background to stop to save CPU
                         stop();
                     }
                 });
 
-                // watchdog: if rotation stops unexpectedly, restart after a short delay
                 const watchdog = setInterval(function () {
                     if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
                         start();
                     }
-                }, 5000);
+                }, 6000);
 
-                // cleanup if hero is removed later (unlikely) -- keep lightweight
-                // start initial rotation
                 if (slides.length > 1) start();
             }
 

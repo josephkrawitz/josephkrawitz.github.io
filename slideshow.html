@@ -421,6 +421,14 @@
         transform: translateZ(0);
     }
     .hero-slide.active { opacity: 1; }
+    /* On mobile, prefer a single static image and avoid creating a slideshow */
+    .hero-static {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: inherit;
+    }
     .hero-caption {
         position: absolute;
         left: 16px;
@@ -909,21 +917,45 @@
                 const hero = document.getElementById('hero');
                 if (!hero) return;
                 hero.innerHTML = '';
-                // const excludes = getExcludedSet();
                 // use bannerPhotos (user-supplied) and apply excludes
                 let images = (bannerPhotos || []).filter(name => name);
+
+                if (!images.length) {
+                    hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No banner images configured</div>';
+                    return;
+                }
+
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+                // On mobile, only show one static hero image and avoid preloading/initializing the slideshow
+                if (isMobile) {
+                    const idx = RANDOMIZE_BANNER ? Math.floor(Math.random() * images.length) : 0;
+                    const name = images[idx];
+                    const img = document.createElement('img');
+                    img.className = 'hero-static';
+                    img.decoding = 'async';
+                    img.loading = 'eager';
+                    img.alt = niceCaption(name);
+                    img.src = photoDir + encodeURI(name);
+                    hero.appendChild(img);
+
+                    const caption = document.createElement('div');
+                    caption.className = 'hero-caption';
+                    caption.textContent = niceCaption(name || '');
+                    hero.appendChild(caption);
+                    return;
+                }
+
+                // Desktop/tablet behavior: allow banner randomization, preload first image and create rotating slides
                 if (RANDOMIZE_BANNER) images = shuffle(images.slice());
-                // preload first banner photo to speed up initial paint on mobile
+
+                // preload first banner photo to speed up initial paint on desktop/tablet
                 if (images && images[0]) {
                     const _link = document.createElement('link');
                     _link.rel = 'preload';
                     _link.as = 'image';
                     _link.href = photoDir + encodeURI(images[0]);
                     try { _link.setAttribute('importance','high'); _link.crossOrigin = 'anonymous'; document.head.appendChild(_link); } catch (e) {}
-                }
-                if (!images.length) {
-                    hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No banner images configured</div>';
-                    return;
                 }
 
                 const slides = [];
@@ -965,7 +997,7 @@
                                 function start() {
                                         if (intervalId || slides.length <= 1) return;
                                         intervalId = setInterval(next, 4000); // rotate every 4s now
-                                        if (Date.now() - lastRun > 5000) next();
+                                        if (Date.now() - lastRun > 6000) next();
                                 }
 
                                 function stop() {
@@ -990,7 +1022,7 @@
                                     if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
                                         start();
                                     }
-                                }, 5000);
+                                }, 6000);
 
                                 // start rotating
                                 if (slides.length > 1) start();
