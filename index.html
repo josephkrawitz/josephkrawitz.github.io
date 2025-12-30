@@ -564,7 +564,15 @@
                 const uniq = Array.from(new Set(all));
                 return shuffle(uniq.slice());
             })();
-            
+
+            // Preload first highlight image for faster first-paint (helps mobile)
+            if (highlightImages && highlightImages[0]) {
+                const _link = document.createElement('link');
+                _link.rel = 'preload';
+                _link.as = 'image';
+                _link.href = 'Japan Blog/Photos/' + encodeURI(highlightImages[0]);
+                try { document.head.appendChild(_link); } catch (e) { /* ignore */ }
+            }
 
                 // Toggle this to false to disable the visible filename in the hero banner
                 // (you can also comment out the section between the START/END markers below)
@@ -590,9 +598,14 @@
                     img.className = 'hero-slide';
                     img.src = photoDir + encodeURI(name);
                     img.decoding = 'async';
-                    img.loading = 'eager';
+                    // prioritize the first image, lazy-load the rest
+                    img.loading = (i === 0) ? 'eager' : 'lazy';
+                    if (i === 0) {
+                        img.classList.add('active');
+                        // hint for newer browsers
+                        try { img.fetchPriority = 'high'; } catch (e) {}
+                    }
                     img.alt = niceCaption(name);
-                    if (i === 0) img.classList.add('active');
                     hero.appendChild(img);
                     slides.push(img);
                 });

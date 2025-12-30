@@ -910,6 +910,14 @@
                 // use bannerPhotos (user-supplied) and apply excludes
                 let images = (bannerPhotos || []).filter(name => name);
                 if (RANDOMIZE_BANNER) images = shuffle(images.slice());
+                // preload first banner photo to speed up initial paint on mobile
+                if (images && images[0]) {
+                    const _link = document.createElement('link');
+                    _link.rel = 'preload';
+                    _link.as = 'image';
+                    _link.href = photoDir + encodeURI(images[0]);
+                    try { document.head.appendChild(_link); } catch (e) {}
+                }
                 if (!images.length) {
                     hero.innerHTML = '<div class="hero-placeholder" style="color:#fff;padding:20px;display:flex;align-items:center;justify-content:center;">No banner images configured</div>';
                     return;
@@ -921,9 +929,12 @@
                     img.className = 'hero-slide';
                     img.src = photoDir + encodeURI(name);
                     img.decoding = 'async';
-                    img.loading = 'eager';
+                    img.loading = (i === 0) ? 'eager' : 'lazy';
+                    if (i === 0) {
+                        img.classList.add('active');
+                        try { img.fetchPriority = 'high'; } catch (e) {}
+                    }
                     img.alt = niceCaption(name);
-                    if (i === 0) img.classList.add('active');
                     hero.appendChild(img);
                     slides.push(img);
                 });
@@ -985,6 +996,15 @@
                 const container = document.getElementById('galleries');
                 if (!container) return;
                 container.innerHTML = '';
+
+                // show a small, dismissible warning on mobile that the gallery is large
+                if (window.matchMedia('(max-width: 768px)').matches && !sessionStorage.getItem('slideshowMobileNoticeDismissed')) {
+                    const notice = document.createElement('div');
+                    notice.className = 'mobile-warning';
+                    notice.innerHTML = '<div><strong>Large page:</strong> This gallery contains many images and may be slow on mobile devices.</div><div><button class="dismiss">Dismiss</button></div>';
+                    container.parentNode.insertBefore(notice, container);
+                    notice.querySelector('.dismiss').addEventListener('click', function () { notice.remove(); sessionStorage.setItem('slideshowMobileNoticeDismissed', '1'); });
+                }
                 // render quick-nav links
                 const nav = document.getElementById('gallery-links');
                 if (nav) nav.innerHTML = '';
@@ -1010,7 +1030,12 @@
                     grid.className = 'gallery-grid';
                     grid.setAttribute('role','list');
 
-                    (categories[cat] || []).forEach(name => {
+                    // On mobile, limit initial thumbnails to reduce memory/CPU pressure; allow 'Show more'
+                    const allNames = (categories[cat] || []);
+                    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                    const limit = isMobile ? 12 : allNames.length;
+
+                    function appendThumb(name) {
                         const url = photoDir + encodeURI(name);
                         const fig = document.createElement('figure');
                         fig.setAttribute('role','listitem');
@@ -1031,7 +1056,20 @@
                         fig.appendChild(cap);
 
                         grid.appendChild(fig);
-                    });
+                    }
+
+                    allNames.slice(0, limit).forEach(appendThumb);
+
+                    if (isMobile && allNames.length > limit) {
+                        const moreBtn = document.createElement('button');
+                        moreBtn.className = 'show-more';
+                        moreBtn.textContent = 'Show more';
+                        moreBtn.addEventListener('click', function () {
+                            allNames.slice(limit).forEach(appendThumb);
+                            moreBtn.remove();
+                        });
+                        section.appendChild(moreBtn);
+                    }
 
                     // keyboard activation: Enter/Space opens the modal
                     grid.addEventListener('keydown', function (e) {
