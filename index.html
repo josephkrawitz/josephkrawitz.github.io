@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joe's Japan Travel Blog</title>
+    <style>
+        blu{
+            color: deepskyblue;
+            }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.8;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+
+                /* Modal trigger style (looks like bold link) */
+        .modal-trigger {
+          font-weight: bold;
+          cursor: pointer;
+          color: #d63031;
+          text-decoration: underline;
+        }
+        .modal-trigger:hover { opacity: 0.9; }
+        
+        /* Modal overlay & content */
+        #image-modal-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          z-index: 99999;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        #image-modal-overlay.active { display: flex; }
+        
+        /* modal box */
+        #image-modal {
+          position: relative;
+          max-width: 1000px;
+          max-height: 90vh;
+          width: 90%;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        /* image fits inside modal */
+        #image-modal img {
+          display: block;
+          width: 100%;
+          height: auto;
+          max-height: 90vh;
+          object-fit: contain;
+          background: #f6f6f6;
+        }
+
+        /* caption (I am trying my best) */
+        #image-modal .caption {
+          padding: 10px 15px;
+          font-size: 0.9em;
+          color: #555;
+          border-top: 1px solid #eee;
+          background: #fafafa;
+        }
+        
+        /* close button */
+        #image-modal .modal-close {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #d63031;
+          color: #fff;
+          border: none;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          font-size: 18px;
+          cursor: pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          line-height:1;
+          z-index: 2;
+        }
+        #image-modal .modal-close:hover { background: #ff6b6b; }
+        
+        /* small responsive tweaks */
+        @media (max-width: 480px) {
+          #image-modal { width: 96%; }
+          #image-modal .modal-close { width: 32px; height: 32px; }
+        }
+
+
+        /* CLICK FOR PHOTO TEMPLATE */
+        /* <span class="modal-trigger" data-image="URL">TEXT</span> */
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* me trying my best here */
+        .container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Image covers the container, cropping if necessary, maintaining aspect ratio */
+        /* Other values: 'contain' (fits entirely within container, shows background if aspect ratios differ), 'fill' (stretches to fill, may distort), 'scale-down', 'none' */
+}
+
+/* Trying to make navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #ff6b6b;
+            color:#333;
+            transition: background-color 0.2s;
+        }
+
+        .navigation-buttons button:hover {
+            background-color: #d63031;
+        }
+
+        /* End of me trying to make navigation buttons */
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #d63031;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+        }
+
+        p {
+            margin-bottom: 18px;
+            text-align: justify;
+        }
+
+        strong {
+            color: #d63031;
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+            color: #555;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 5px solid #ff6b6b;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .toc li:before {
+            content: "";
+            margin-right: 0;
+        }
+
+        .toc li:nth-child(1):before {
+            content: "💺";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(2):before {
+            content: "🌏 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(3):before {
+            content: "🏯 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(4):before {
+            content: "🌳 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(5):before {
+            content: "🎋 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(6):before {
+            content: "🗻 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(7):before {
+            content: "🚅 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(8):before {
+            content: "🍜 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(9):before {
+            content: "🛍️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(10):before {
+            content: "🗼 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(11):before {
+            content: "🏠 ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(12):before {
+            content: "🖼️ ";
+            margin-right: 10px;
+        }
+
+        .toc li:nth-child(13):before {
+            content: "🎥 ";
+            margin-right: 10px;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        #back-to-top:hover {
+            background: #d63031;
+        }
+
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toc a {
+            color: #d63031;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+            border-radius: 3px;
+            font-style: italic;
+            color: #856404;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6b6b;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+        /* Hero banner styles (shared with slideshow page) */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+        }
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1s ease;
+            display: block;
+        }
+        .hero-slide.active { opacity: 1; }
+        .hero-caption { display: none !important; }
+        /* --- HERO CAPTION START (index only): visible filename overlay ---
+           To disable, set `SHOW_HERO_CAPTION` to false in the script below or
+           comment out the JS block between the START/END markers. */
+        #hero .hero-caption {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            text-align: center;
+            z-index: 2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* --- HERO CAPTION END --- */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Joe's Japan Diaries</h1>
+            <!-- <p class="subtitle">Which may one day have a witty subtitle</p> -->
+
+        </header>
+
+        <!-- Hero banner (shared with slideshow) -->
+            <div id="hero" class="hero" aria-live="polite" aria-label="Featured photos"></div>
+<h2></h2>
+        
+        <p>Welcome to my Japan Travel Blog! The trip was an adventure, but this document was an odyssey.</p> 
+        <p>There is a combination of contemporaneous and retrospective notes throughout the journal, so tenses and perspectives may shift at 
+            times. Since this travel day is not ultimately important, I will not edit and expand on what I wrote in my initial 
+            note, before realizing I would be writing such a detailed account of everything else.</p>
+
+        <!-- <h2 id="day-minus-1">Thursday, April 3rd (Day -1) 🛫</h2>
+        
+        <div class="note"><strong>Editor's note:</strong>  Here's what I said at the time:</div>
+        <p>"Went to the airport in the morning and boarded the plane. Napped."</p>
+
+        <h2></h2>
+        <div class="note"><strong>Editor's note:</strong> I will have bolded, colorful text that you can click on for additional pictures throughout.
+         If the text is <strong>red</strong>, it is a photo taken by myself or Jacob. If it is <blu>blue,</blu> it was found on the Internet. I will figure out,
+         one day, how to add a caption to the pop-up pictures to give them better credit. Any photos in the main page are taken by us.</div> -->
+
+            <!-- <div class="navigation-buttons">   
+                <a href="day-0.html"><button>Next Day</button></a>
+            </div> -->
+            <h2></h2>
+
+            
+<div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="index.html#day-minus-1">Thursday, April 3rd (Day -1) 🛫</a></li>
+                <li><a href="day-0.html">Friday, April 4th (Day 0) 🛬</a></li>
+                <li><a href="day-1.html">Saturday, April 5th: Eastern Kyoto 🦊 (Higashiyama)</a></li>
+                <li><a href="day-2.html">Sunday, April 6th: Western Kyoto (Arashiyama) 🐵</a></li>
+                <li><a href="day-3.html">Monday, April 7th: Nara 🦌</a></li>
+                <li><a href="day-4.html">Tuesday, April 8th: Hakone ⛰️</a></li>
+                <li><a href="day-5.html">Wednesday, April 9th: Hakone, Tokyo ⛩️</a></li>
+                <li><a href="day-6.html">Thursday, April 10th: Tokyo 🐼</a></li>
+                <li><a href="day-7.html">Friday, April 11th: Tokyo 🏬</a></li>
+                <li><a href="day-8.html">Saturday, April 12th: Tokyo 📚</a></li>
+                <li><a href="day-9.html">Sunday, April 13th: Tokyo, New York ✈️</a></li>
+                <li><a href="slideshow.html">Photo Gallery 🏞️</a></li>
+                <li><a href="slideshow.html#gallery-video">Video 📺</a></li>
+            </ul>
+        </div><header></header>
+        
+        <!-- <p>Welcome to my Japan Travel Blog! The trip was an adventure, but this document was an odyssey.</p> 
+        <p>There is a combination of contemporaneous and retrospective notes throughout the journal, so tenses and perspectives may shift at 
+            times. Since this travel day is not ultimately important, I will not edit and expand on what I wrote in my initial 
+            note, before realizing I would be writing such a detailed account of everything else.</p> -->
+
+            <div class="note"><strong>Editor's note:</strong> I will have bolded, colorful text that you can click on for additional pictures throughout.
+         If the text is <strong>red</strong>, it is a photo taken by myself or Jacob. If it is <blu>blue,</blu> it was found on the Internet. I will figure out,
+         one day, how to add a caption to the pop-up pictures to give them better credit. Any photos in the main page are taken by us.</div>
+
+        <h2 id="day-minus-1">Thursday, April 3rd (Day -1) 🛫</h2>
+        
+        <div class="note"><strong>Editor's note:</strong>  Here's what I wrote at the time:</div>
+        <p>"Went to the airport in the morning and boarded the plane. Napped."</p>
+
+        <!-- <img src="" -->
+
+        <h2></h2>
+        
+    
+            <div class="navigation-buttons">   
+                 <a href="index.html"><button>Home</button></a>
+                 <a href="day-0.html"><button>Next Day</button></a>
+             </div>
+
+        </div>
+
+    <button id="back-to-top" title="Back to top">↑ Top</button>
+
+    <script>
+        const backToTopButton = document.getElementById('back-to-top');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('show');
+            } else {
+                backToTopButton.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when clicked
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+        <script>
+        // Build hero using the same four category sets (Kyoto, Nara, Hakone, Tokyo)
+        (function () {
+            const photoDir = 'Japan Blog/Photos/';
+
+            const kyoto = [
+                'IMG_2812.jpeg','fush2.JPeG','IMG_5376.jpeg','IMG_2816.jpeg','IMG_5417.jpeg','IMG_2824.jpeg','IMG_2832.jpeg','IMG_5484.jpeg','IMG_2834.jpeg','IMG_5549.jpeg','Japan - 94 of 485.jpeg','IMG_2860.jpeg','IMG_2848.jpeg','IMG_5551.jpeg',
+                'japanpic - 1.jpeg','IMG_5681.jpeg','Japan15.jpeg','IMG_5723.jpeg','Japan - 152 of 485.jpeg','Japan - 159 of 485.jpeg','IMG_5739.jpeg','IMG_2920.jpeg','IMG_2928.jpeg','Japan - 181 of 485.jpeg','Japan - 184 of 485.jpeg','IMG_2947.jpeg','IMG_2959.jpeg'
+            ];
+
+            const nara = [
+                'IMG_2980.jpeg','Japan - 207 of 485.jpeg','IMG_5791.jpeg','20250407_102410.jpeg','IMG_2995.jpeg','IMG_5816.jpeg','IMG_5901.jpeg','IMG_5909.jpeg','Japan - 241 of 485.jpeg','TYDXE1292.jpeg','IMG_3033.jpeg','Japan - 270 of 485.jpeg'
+            ];
+
+            const hakone = [
+                'fujitrain.jpeg','fujitrain2.jpeg','IMG_6028.jpeg','Japan - 282 of 485.jpeg','IMG_3076.jpeg','IMG_3081.jpeg','cable fuji.jpeg','IMG_3088.jpeg','IMG_3091.jpeg','IMG_3104.jpeg','Japan - 325 of 485.jpeg','IMG_6049.jpeg','20250409_090553.jpg','IMG_6100.jpeg','Japan - 351 of 485.jpeg','Japan - 352 of 485.jpeg','Japan - 353 of 485.jpeg'
+            ];
+
+            const tokyo = [
+                '20250409_155617.jpeg','Asakusa_Shrine.jpg','Japan - 378 of 485.jpeg','Japan - 379 of 485.jpeg','20250409_170353.jpeg','Japan - 384 of 485.jpeg','Japan - 389 of 485.jpeg','IMG_3285.jpeg','20250409_185305.jpeg','20250409_220908.jpeg','IMG_3328.jpeg','IMG_3341.jpeg','IMG_6237.jpeg','IMG_6321.jpeg','IMG_6306.jpeg','Japan - 410 of 485.jpeg','Japan - 429 of 485.jpeg','20250410_181655.jpg','20250410_190749.jpg','train window.JPG','yoyogi1.JPG','20250411_100107.jpeg','20250411_101127.jpeg','Japan - 436 of 485.jpeg','Japan - 439 of 485.jpeg','Japan - 441 of 485.jpeg','20250411_120447.jpg','20250411_121512.jpg','20250411_130740.jpeg','brendan.jpeg','IMG_3430.jpeg','20250411_205256.jpg','IMG_3450.jpeg','subwayrobot.JPG','IMG_3465.jpeg','IMG_3469.jpeg','IMG_3478.jpeg','IMG_3499.jpeg','IMG_3504.jpeg','Japan - 476 of 485.jpeg','20250412_202219.jpeg','Japan - 479 of 485.jpeg','20250412_212148.jpeg'
+            ];
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            // By default the index hero shows images in-order (Kyoto → Nara → Hakone → Tokyo)
+            // To switch back to randomized order, uncomment the randomized block below.
+            // const highlightImages = (function () {
+            //     const all = [].concat(kyoto, nara, hakone, tokyo);
+            //     const uniq = Array.from(new Set(all));
+            //     return uniq; // keep original order
+            // })();
+
+            //Randomized version (uncomment to enable random heroes)
+            const highlightImages = (function () {
+                const all = [].concat(kyoto, nara, hakone, tokyo);
+                const uniq = Array.from(new Set(all));
+                return shuffle(uniq.slice());
+            })();
+            
+
+                // Toggle this to false to disable the visible filename in the hero banner
+                // (you can also comment out the section between the START/END markers below)
+                const SHOW_HERO_CAPTION = true;
+
+            function niceCaption(filename) {
+                return filename.replace(/\.[^.]+$/, '')
+                                             .replace(/[_-]+/g, ' ')
+                                             .replace(/\s+/g, ' ')
+                                             .trim();
+            }
+                // (Caption elements are created inside renderHero() where the hero container
+                // is available. The stray top-level caption creation and update were removed
+                // because they ran before the DOM element existed and caused reference errors.)
+
+            function renderHero() {
+                const hero = document.getElementById('hero');
+                if (!hero) return;
+                hero.innerHTML = '';
+                const slides = [];
+                highlightImages.forEach((name, i) => {
+                    const img = document.createElement('img');
+                    img.className = 'hero-slide';
+                    img.src = photoDir + encodeURI(name);
+                    img.decoding = 'async';
+                    img.loading = 'eager';
+                    img.alt = niceCaption(name);
+                    if (i === 0) img.classList.add('active');
+                    hero.appendChild(img);
+                    slides.push(img);
+                });
+
+                let idx = 0;
+                let intervalId = null;
+                let lastRun = Date.now();
+
+                // --- SLIDE DURATION START ---
+                // Change this value (milliseconds) to make each slide stay longer/shorter
+                // (e.g., 4000 = 4 seconds)
+                const SLIDE_DURATION_MS = 5000;
+                // --- SLIDE DURATION END ---
+
+                function show(i) {
+                    try {
+                        if (!slides.length) return;
+                        slides.forEach((s, j) => s.classList.toggle('active', j === i));
+                        // --- HERO CAPTION START (update) ---
+                        if (typeof caption !== 'undefined' && caption && SHOW_HERO_CAPTION) caption.textContent = niceCaption(highlightImages[i] || '');
+                        // --- HERO CAPTION END ---
+                        idx = i;
+                        lastRun = Date.now();
+                    } catch (err) {
+                        console.error('Error in hero show():', err);
+                    }
+                }
+
+                function next() { if (slides.length > 1) { try { show((idx + 1) % slides.length); } catch (e) { console.error('Error advancing hero:', e); } } }
+
+                function start() {
+                    if (intervalId || slides.length <= 1) return;
+                    intervalId = setInterval(() => { try { next(); } catch (e) { console.error('Hero interval error:', e); } }, SLIDE_DURATION_MS);
+                    // run once immediately if not started recently
+                    if (Date.now() - lastRun > SLIDE_DURATION_MS + 1000) next();
+                    console.debug('hero: started, slides=', slides.length, 'duration=', SLIDE_DURATION_MS);
+                }
+
+                function stop() {
+                    if (!intervalId) return;
+                    clearInterval(intervalId);
+                    intervalId = null;
+                    console.debug('hero: stopped');
+                }
+
+                hero.addEventListener('mouseenter', stop);
+                hero.addEventListener('mouseleave', start);
+                hero.addEventListener('touchstart', stop);
+                hero.addEventListener('touchend', start);
+
+                // Ensure rotation resumes when tab becomes visible again
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'visible') {
+                        start();
+                    } else {
+                        // allow background to stop to save CPU
+                        stop();
+                    }
+                });
+
+                // watchdog: if rotation stops unexpectedly, restart after a short delay
+                const watchdog = setInterval(function () {
+                    if (slides.length > 1 && !intervalId && !hero.matches(':hover')) {
+                        start();
+                    }
+                }, 5000);
+
+                // cleanup if hero is removed later (unlikely) -- keep lightweight
+                // start initial rotation
+                if (slides.length > 1) start();
+            }
+
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderHero); else renderHero();
+        })();
+        </script>
+
+    <script>
+    (function () {
+      // create overlay/modal once (id used to avoid duplicates)
+      if (!document.getElementById('image-modal-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.id = 'image-modal-overlay';
+        overlay.innerHTML = '\
+          <div id="image-modal" role="dialog" aria-modal="true" aria-hidden="true">\
+            <button class="modal-close" aria-label="Close image">✕</button>\
+            <img id="image-modal-img" src="" alt="Preview image">\
+          </div>';
+        document.body.appendChild(overlay);
+      }
+
+      const overlay = document.getElementById('image-modal-overlay');
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('image-modal-img');
+      const closeBtn = modal.querySelector('.modal-close');
+    
+      // open modal with given URL
+      function openModal(url, altText) {
+        modalImg.src = url || '';
+        if (altText) modalImg.alt = altText;
+        overlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        // trap focus on close button for simplicity
+        closeBtn.focus();
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    
+      function closeModal() {
+        overlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        document.body.style.overflow = '';
+      }
+    
+      // click delegation for any element with class modal-trigger
+      document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('.modal-trigger');
+        if (!trigger) return;
+        const img = trigger.getAttribute('data-image');
+        const alt = trigger.getAttribute('data-alt') || trigger.textContent || 'Image';
+        if (!img) {
+          console.warn('modal-trigger clicked, but no data-image attribute found.');
+          return;
+        }
+        e.preventDefault();
+        openModal(img, alt);
+      });
+    
+      // close button and click outside to close
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+      });
+    
+      // ESC closes modal
+      document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && overlay.classList.contains('active')) {
+          closeModal();
+        }
+      });
+    })();
+    </script> 
+
+</body>
+</html>
