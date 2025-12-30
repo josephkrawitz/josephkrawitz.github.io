@@ -926,12 +926,6 @@
                     return;
                 }
 
-                // use the first banner image as a background placeholder
-                if (images && images[0]) {
-                    try { hero.style.backgroundImage = 'url("' + photoDir + encodeURI(images[0]) + '")'; } catch (e) {}
-                    hero.style.backgroundSize = 'cover';
-                    hero.style.backgroundPosition = 'center';
-                }
                 const slides = [];
                 images.forEach((name, i) => {
                     const img = document.createElement('img');
@@ -943,9 +937,6 @@
                         img.classList.add('active');
                         try { img.fetchPriority = 'high'; } catch (e) {}
                         try { img.setAttribute('fetchpriority', 'high'); } catch (e) {}
-                        img.addEventListener('load', function () {
-                            try { setTimeout(function () { hero.style.backgroundImage = 'none'; }, 60); } catch (e) {}
-                        }, { once: true });
                     }
                     img.src = photoDir + encodeURI(name);
                     hero.appendChild(img);
